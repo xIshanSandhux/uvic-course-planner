@@ -1,2 +1,8 @@
 streamlit
 watchdog
+openai
+requests
+azure-ai-formrecognizer
+fastapi
+uvicorn
+python-dotenv

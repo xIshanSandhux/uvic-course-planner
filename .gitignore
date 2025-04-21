@@ -1,0 +1,9 @@
+# API keys
+# .streamlit/
+
+# virtual env
+# venv/
+
+
+__pycache__/
+*.py[cod]

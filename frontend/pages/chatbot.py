@@ -2,6 +2,7 @@ import random
 import time
 import streamlit as st
 from io import BytesIO
+from openai import AzureOpenAI
 
 
 # --- PAGE SETTINGS ---
@@ -17,44 +18,99 @@ st.title("UVic Course Planner AI Assistant")
 # --- GET USER INFO ---
 user_name = st.session_state.get('name')  # Safe fallback if 'name' is missing
 
-# --- Streamed Response Emulator ---
-def response_generator(text):
-    for word in text.split():
-        yield word + " "
-        time.sleep(0.6)
+# Azure OpenAI client Initialization
+client = AzureOpenAI(
+    api_key= st.secrets["AZURE_OPENAI_API_KEY"],
+    azure_endpoint= st.secrets["AZURE_OPENAI_ENDPOINT"],
+    api_version= st.secrets["AZURE_OPENAI_API_VERSION"]
+)
 
-# --- Initialize chat history ---
+
+major = st.session_state.get('major', 'an unspecified major')
+minor = st.session_state.get('minor', '')
+specialization = st.session_state.get('specialization', '')
+interests = st.session_state.get('interests', 'general academic fields')
+year = st.session_state.get('year', 'an unspecified year')
+number_of_courses = st.session_state['number_of_courses']
+name = st.session_state['name']
+
+# Handle minor
+if minor:
+    minor_sentence = f"They have a minor in {minor}."
+else:
+    minor_sentence = "They do not have a minor."
+
+if major == "Select a major":
+    major_sentence = "They have an unspecified major."
+elif major:
+    major_sentence = f"They have a major in {major}."
+
+# Handle specialization
+if specialization:
+    specialization_sentence = f"They have a specialization in {specialization}."
+else:
+    specialization_sentence = "They have no specialization."
+
+extra_instructions = "There are not extra instructions."
+
+# Different instructions based on year
+if year == "First Year":
+    extra_instructions = "Focus on suggesting introductory-level courses, core program requirements, and electives that do not have heavy prerequisites. Be very encouraging and explain options simply."
+elif year == "Second Year":
+    extra_instructions = "Suggest a mix of core required courses and some elective options. Assume the student has completed most first-year prerequisites."
+elif year == "Third Year":
+    extra_instructions = "Suggest advanced electives and core upper-level courses. Help them explore specialization options if they are still open."
+elif year == "Fourth Year":
+    extra_instructions = "Focus on suggesting capstone projects, technical electives, and courses that complete graduation requirements."
+
+
+# Now create the full system prompt
+system_prompt = f"""
+You are a kind and helpful UVic course planning assistant.
+{major_sentence}
+{minor_sentence}
+{specialization_sentence}
+Their academic interests include {interests}.
+They are currently in their {year} of study.
+They want to take {number_of_courses} courses.
+{extra_instructions}
+Always ensure prerequisites are met, workloads are balanced, and their interests are supported.
+Speak in a friendly and encouraging tone. Personalize your responses by addressing the student by their name: {name}.
+"""
+
+
+# Set default model deployment name
+st.session_state["openai_deployment"] = st.secrets["AZURE_OPENAI_DEPLOYMENT"]   # <-- Important! Set your deployment name
+
+# Initialize chat messages if not already
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    
-    # --- Assistant starts the conversation! ---
-    welcome_message = f"Hello {user_name}! 🎓 Let's get started planning your courses!"
-    st.session_state.messages.append({"role": "assistant", "content": welcome_message})
 
-# --- Display chat messages from history ---
+# Display all chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- Accept user input ---
-if prompt := st.chat_input("What is up?"):
-    # Add user message
+# User input
+if prompt := st.chat_input("Enter your message"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Assistant response
-    assistant_reply = random.choice(
-        [
-            f"Thanks for your question, {user_name}! Let me help you with that.",
-            f"Alright {user_name}, let me find the best schedule for you!",
-            f"Good question! Here's what I suggest...",
-        ]
-    )
 
+    full_message =  [{"role": "system", "content": system_prompt}] + [
+    {"role": m["role"], "content": m["content"]}
+    for m in st.session_state.messages
+    ]
+
+    # Assistant reply
     with st.chat_message("assistant"):
-        response = st.write_stream(response_generator(assistant_reply))
-    
-    # Save assistant message
-    st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+        stream = client.chat.completions.create(
+            model=st.session_state["openai_deployment"],  # Use deployment name, not model name
+            messages=full_message,
+            stream=True,
+        )
+        response = st.write_stream(stream)
 
+    # Save assistant response
+    st.session_state.messages.append({"role": "assistant", "content": response})
