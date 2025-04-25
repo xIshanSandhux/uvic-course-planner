@@ -117,6 +117,7 @@ print(st.session_state['courses'])
 if st.session_state['courses'] !=[] or st.session_state['major']!="Select a Major":
     next_button = st.button("Next")
     if next_button:
+        requests.post("http://127.0.0.1:8000/course_list", json={"courses": st.session_state['courses']})
         if st.session_state['student_status']=="Yes":
             st.switch_page("pages/course_list.py")
 

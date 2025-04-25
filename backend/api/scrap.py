@@ -132,7 +132,7 @@ def extracting_courses(link:str):
 
     # Step 4: Now filter lines that contain course codes
     final_course_mentions = [
-        line for line in extracted_lines if re.search(r'[A-Z]{3,4}\s\d{3}|\b[1-5]{1,5}\sTechnical Electives\b|\bNatural Science\b|\bComplementary Studies\b', line)
+        line for line in extracted_lines if re.search(r'[A-Z]{3,4}\s\d{3}|\b[1-5]{1,5}\sTechnical Electives\b', line)
     ]
 
     # Step 5: Output

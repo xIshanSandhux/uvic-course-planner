@@ -1,8 +1,9 @@
 # API keys
-# .streamlit/
+.streamlit/
+.env/
 
 # virtual env
-# venv/
+venv/
 
 
 __pycache__/

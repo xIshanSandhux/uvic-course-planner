@@ -3,7 +3,13 @@ import time
 import streamlit as st
 from io import BytesIO
 from openai import AzureOpenAI
+import requests
 
+
+courses_completed =  requests.get("http://127.0.0.1:8000/courses_completed")
+courses_com = courses_completed.json()
+course_all = (requests.get("http://127.0.0.1:8000/course_list")).json()
+print("courses: ",courses_com)
 
 # --- PAGE SETTINGS ---
 st.set_page_config(
@@ -64,14 +70,16 @@ elif year == "Fourth Year":
     extra_instructions = "Focus on suggesting capstone projects, technical electives, and courses that complete graduation requirements."
 
 
+# Courses 
+
 # Now create the full system prompt
 system_prompt = f"""
 You are a kind and helpful UVic course planning assistant.
 {major_sentence}
 {minor_sentence}
 {specialization_sentence}
-Their academic interests include {interests}.
-They are currently in their {year} of study.
+Their academic interests include {interests}. Courses completed by the user are  {courses_com}.
+They are currently in their {year} of study. Course list of the user's major is {course_all}
 They want to take {number_of_courses} courses.
 {extra_instructions}
 Always ensure prerequisites are met, workloads are balanced, and their interests are supported.

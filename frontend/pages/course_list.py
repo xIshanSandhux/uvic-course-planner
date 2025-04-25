@@ -1,39 +1,36 @@
 import streamlit as st
+import requests
 
-st.title("Course List")
 
-course_list = st.session_state['courses']  # Example: ["CSC 110", "CSC 115", "CSC 110", "ECE 260"]
+if "selected_courses" not in st.session_state:
+    st.session_state['selected_courses']=[]
 
-# --- Initialize checkboxes (only once) ---
-for idx, course in enumerate(course_list):
-    checkbox_key = f"{course}_{idx}"
-    if checkbox_key not in st.session_state:
-        st.session_state[checkbox_key] = False
-
-# 🔎 Search bar
+courses = st.session_state['courses']
+# --- 🛠 Initialize all course checkbox states ---
+for course in courses:
+     if course not in st.session_state:
+         st.session_state[course] = False
+ 
+ # --- 🔎 Search bar ---
 search_query = st.text_input("🔍 Search courses:", "")
-
-# 🔥 Filter courses for display
+ 
+ # --- 🔥 Filter courses based on search ---
 if search_query:
-    filtered_courses = [ (idx, course) for idx, course in enumerate(course_list) if search_query.lower() in course.lower()]
+     filtered_courses = [course for course in courses if search_query.lower() in course.lower()]
 else:
-    filtered_courses = [ (idx, course) for idx, course in enumerate(course_list)]
-
-# ✅ Show checkboxes
+     filtered_courses = courses
+ 
+ # --- ✅ Show checkboxes for filtered courses ---
 st.write("### Select Courses:")
 
-for idx, course in filtered_courses:
-    checkbox_key = f"{course}_{idx}"
-    st.checkbox(course, value=st.session_state[checkbox_key], key=checkbox_key)  # 🔥 Only render, don't assign manually!
+for course in filtered_courses:
+    st.checkbox(course, value=st.session_state[course], key=course)   # ❗️ No assignment here
 
-# 📋 Get all selected courses
-selected_courses = []
-for idx, course in enumerate(course_list):
-    checkbox_key = f"{course}_{idx}"
-    if st.session_state.get(checkbox_key):
-        selected_courses.append(course)
+# --- 📋 Get all selected courses ---
+selected_courses = [course for course in courses if st.session_state[course]]
+# st.session_state['selected_courses'] = selected_courses
 
-# ✅ Display selected courses
+# --- 📋 Display selected courses ---
 st.write("### Your Selected Courses:")
 if selected_courses:
     for course in selected_courses:
@@ -41,4 +38,13 @@ if selected_courses:
 else:
     st.info("No courses selected yet.")
 
-print(selected_courses)
+col1, col2 = st.columns(2)
+
+# Put a button inside each column
+with col1:
+    if st.button("Back to User Details"):
+        st.switch_page("pages/user_pref.py")
+with col2:
+    if st.button("Start Planning"):
+        response = requests.post("http://127.0.0.1:8000/courses_completed", json={"courses": selected_courses})
+        st.switch_page("pages/chatbot.py")
