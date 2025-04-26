@@ -39,6 +39,8 @@ interests = st.session_state.get('interests', 'general academic fields')
 year = st.session_state.get('year', 'an unspecified year')
 number_of_courses = st.session_state['number_of_courses']
 name = st.session_state['name']
+elective_courses = st.session_state['elective_courses']
+core_courses = st.session_state['core_courses']
 
 # Handle minor
 if minor:
@@ -80,7 +82,8 @@ You are a kind and helpful UVic course planning assistant.
 {specialization_sentence}
 Their academic interests include {interests}. Courses completed by the user are  {courses_com}.
 They are currently in their {year} of study. Course list of the user's major is {course_all}
-They want to take {number_of_courses} courses.
+They want to take {elective_courses} number of elective courses.
+They want to take {core_courses} number of elective courses.
 {extra_instructions}
 Always ensure prerequisites are met, workloads are balanced, and their interests are supported.
 Speak in a friendly and encouraging tone. Personalize your responses by addressing the student by their name: {name}.

@@ -36,7 +36,10 @@ if "year" not in st.session_state:
     st.session_state['year'] = "Please Select an Option"
 if "courses" not in st.session_state:
     st.session_state['courses'] = []
-
+if "core_courses" not in st.session_state:
+    st.session_state['core_courses'] = 1
+if "elective_courses" not in st.session_state:
+    st.session_state['elective_courses'] = 0
 
 # name = st.text_input("Name", placeholder="Enter your name", value=st.session_state['name'])
 # major = st.selectbox("Select your major", ["Select a Major","Software Engineering", "Computer Science", "Electrical Engineering","Computer Engineering","Biomedical Engineering","Mechanical Engineering","Civil Engineering"])
@@ -57,7 +60,30 @@ st.session_state['minor'] = st.text_input("Enter your Minor", value=st.session_s
 
 st.session_state['specialization'] = st.text_input("Specialization (optional)", value=st.session_state['specialization'], placeholder="e.g., AI, Cybersecurity")
 
-st.session_state['number_of_courses'] = st.slider('How many courses do you want to take?', 1, 6, value=st.session_state['number_of_courses'])
+col1, col2 = st.columns(2)
+
+with col1:
+    core = st.slider(
+        'How many core courses do you want to take?',
+        0, 3, 
+        value=st.session_state['core_courses']
+    )
+    st.session_state['core_courses'] = core
+
+with col2:
+    # Calculate remaining slots for electives
+    elective = st.slider(
+        'How many electives do you want to take?',
+        0, 3, 
+        value=st.session_state['elective_courses']
+    )
+    st.session_state['elective_courses'] = elective
+
+total_courses = st.session_state['core_courses'] + st.session_state['elective_courses']
+if total_courses >= 8:
+    st.warning('Total number of courses cannot exceed 8')
+
+st.session_state['number_of_courses'] = total_courses
 
 st.session_state['degree_type'] = st.selectbox("Select your Degree Type", 
     ["Please Select an Option", "Undergraduate", "Master", "PHD"],
@@ -98,6 +124,7 @@ if (prev_major!= major and major != "Select a Major"):
 
                 # check if response is a list (courses) or dict (error)
                 if isinstance(data, list):
+                    print(data)
                     st.session_state['courses'] = data
                     st.success("Courses extracted successfully!")
                 elif isinstance(data, dict):
