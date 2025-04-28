@@ -1,4 +1,4 @@
-# source venv/bin/activate
+# venv\Scripts\activate
 # python3 -m venv venv
 # pip install -r requirement.txt
 import streamlit as st

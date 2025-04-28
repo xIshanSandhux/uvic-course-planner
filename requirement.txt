@@ -6,3 +6,6 @@ azure-ai-formrecognizer
 fastapi
 uvicorn
 python-dotenv
+databases
+asyncpg
+beautifulsoup4
