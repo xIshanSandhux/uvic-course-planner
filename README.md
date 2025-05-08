@@ -11,5 +11,5 @@ pip install -r requirement.txt
 # Backend:
 unicorn backend.main:app --reload
 
-#Frontend: 
+# Frontend: 
 streamlit run frontend/landing_page.py
