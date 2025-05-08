@@ -68,7 +68,7 @@ def parse_prerequisites(html: str):
 with open('courses.json', 'r', encoding='utf-8') as f:
     courses = json.load(f)
 
-csc370 = next(c for c in courses if c['__catalogCourseId'] == 'ECE355')
+csc370 = next(c for c in courses if c['__catalogCourseId'] == 'SENG468')
 groups = parse_prerequisites(csc370['preAndCorequisites'])
 
 for rule_type, count, opts in groups:
