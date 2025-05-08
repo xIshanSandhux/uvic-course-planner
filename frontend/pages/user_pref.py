@@ -39,9 +39,13 @@ if "year" not in st.session_state:
 if "courses" not in st.session_state:
     st.session_state['courses'] = []
 if "core_courses" not in st.session_state:
-    st.session_state['core_courses'] = 1
+    st.session_state['core_courses'] = 0
 if "elective_courses" not in st.session_state:
     st.session_state['elective_courses'] = 0
+if "supports_coop" not in st.session_state:
+    st.session_state["supports_coop"] = "Please Select an Option"
+if "coop_planned" not in st.session_state:
+    st.session_state["coop_planned"] = 0
 
 # name = st.text_input("Name", placeholder="Enter your name", value=st.session_state['name'])
 # major = st.selectbox("Select your major", ["Select a Major","Software Engineering", "Computer Science", "Electrical Engineering","Computer Engineering","Biomedical Engineering","Mechanical Engineering","Civil Engineering"])
@@ -70,7 +74,7 @@ with col1:
         min_value=0,
         max_value=8,
         step=1,
-        value=int(st.session_state.get("core_courses", 1)),
+        # value=int(st.session_state.get("core_courses", 1)),
         format="%d",
         key="core_courses"
     )
@@ -81,7 +85,7 @@ with col2:
         min_value=0,
         max_value=8,
         step=1,
-        value=int(st.session_state.get("elective_courses", 0)),
+        # value=int(st.session_state.get("elective_courses", 0)),
         format="%d",
         key="elective_courses"
     )
@@ -107,6 +111,38 @@ st.session_state['year'] = st.selectbox("What year are you in?",
     ["Please Select an Option", "Year 1", "Year 2", "Year 3","Year 4"],
     index=["Please Select an Option", "Year 1", "Year 2", "Year 3","Year 4"].index(st.session_state['year'])
 )
+
+year_sel = st.session_state["year"]
+if year_sel in ["Year 2", "Year 3", "Year 4"]:
+    # 1) Ask if their program even supports co-op
+    supports = st.selectbox(
+        "Does your program support co-op?",
+        ["Please Select an Option", "Yes", "No"],
+        key="supports_coop"
+    )
+
+    # 2) Only if they say Yes, ask how many they plan
+    if supports == "Yes":
+    # Don't assign into session_state here, let the widget do it:
+        completed = st.number_input(
+            "How many co-op terms have you already completed?",
+            min_value=0,
+            max_value=4,
+            step=1,
+            key="coop_completed",
+            # value=st.session_state.get("coop_completed", 0),
+            format="%d",
+        )
+
+        planned = st.number_input(
+            "How many total co-op terms would you like to finish by graduation?",
+            min_value=0,
+            max_value=4,
+            step=1,
+            key="coop_planned",
+            # value=st.session_state.get("coop_planned", 0),
+            format="%d",
+        )
 
 # Maybe add faculty ? and then narrow down major based on faculty? 
 # need to figure out a way to the current date. prolly streamlit should have a way to get the current date

@@ -1,6 +1,6 @@
 # API keys
 .streamlit/
-.env/
+.env
 
 # virtual env
 venv/

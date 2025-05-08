@@ -71,20 +71,27 @@ elif year == "Third Year":
 elif year == "Fourth Year":
     extra_instructions = "Focus on suggesting capstone projects, technical electives, and courses that complete graduation requirements."
 
+coop_completed = st.session_state.get("coop_completed", 0)
+coop_planned   = st.session_state.get("coop_planned", 0)
+
 
 # Courses 
 
 # Now create the full system prompt
 system_prompt = f"""
-You are a kind and helpful UVic course planning assistant.
+You are a kind and helpful UVic course planning assistant expert.
 {major_sentence}
 {minor_sentence}
 {specialization_sentence}
-Their academic interests include {interests}. Courses completed by the user are  {courses_com}.
+Their academic interests include {interests}. Courses completed by the user are {courses_com}.
 They are currently in their {year} of study. Course list of the user's major is {course_all}
 They want to take {elective_courses} number of elective courses.
-They want to take {core_courses} number of elective courses.
+They want to take {core_courses} number of core courses.
 {extra_instructions}
+
+Note: The student has completed {coop_completed} co-op term{"s" if coop_completed != 1 else ""} and plans to complete {coop_planned}. 
+Since they’re looking to do more co-op, you can either tailor course suggestions around that or direct them to explore co-op applications at https://learninginmotion.uvic.ca/.
+
 Always ensure prerequisites are met, workloads are balanced, and their interests are supported.
 Speak in a friendly and encouraging tone. Personalize your responses by addressing the student by their name: {name}.
 """
