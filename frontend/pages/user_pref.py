@@ -15,6 +15,8 @@ st.set_page_config(
 st.title("UVic Course Planner 🎓")
 st.header("User Details")
 
+warning_slot = st.empty()
+
 # Initalizing session state
 if "name" not in st.session_state:
     st.session_state['name'] = ""
@@ -63,25 +65,32 @@ st.session_state['specialization'] = st.text_input("Specialization (optional)", 
 col1, col2 = st.columns(2)
 
 with col1:
-    core = st.slider(
-        'How many core courses do you want to take?',
-        0, 3, 
-        value=st.session_state['core_courses']
+    core = st.number_input(
+        "How many core courses do you want to take?",
+        min_value=0,
+        max_value=8,
+        step=1,
+        value=int(st.session_state.get("core_courses", 1)),
+        format="%d",
+        key="core_courses"
     )
-    st.session_state['core_courses'] = core
 
 with col2:
-    # Calculate remaining slots for electives
-    elective = st.slider(
-        'How many electives do you want to take?',
-        0, 3, 
-        value=st.session_state['elective_courses']
+    elective = st.number_input(
+        "How many elective courses do you want to take?",
+        min_value=0,
+        max_value=8,
+        step=1,
+        value=int(st.session_state.get("elective_courses", 0)),
+        format="%d",
+        key="elective_courses"
     )
-    st.session_state['elective_courses'] = elective
 
-total_courses = st.session_state['core_courses'] + st.session_state['elective_courses']
+total_courses = core + elective
 if total_courses >= 8:
     st.warning('Total number of courses cannot exceed 8')
+else:
+    st.empty()
 
 st.session_state['number_of_courses'] = total_courses
 
