@@ -7,5 +7,9 @@ python -m venv venv
 pip install -r requirement.txt
 
 # To Run:
+
+# Backend:
 unicorn backend.main:app --reload
+
+#Frontend: 
 streamlit run frontend/landing_page.py
