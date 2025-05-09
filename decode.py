@@ -41,6 +41,7 @@ def extract_courses_from_json(json_path):
 
     # Remove duplicates while preserving order
     course_list = list(dict.fromkeys(course_list))
+    print(course_list)
 
     return course_list
 
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     courses = extract_courses_from_json(json_file)
 
     # Print to console
-    print_courses(courses)
+    # print_courses(courses)
 
     # Optional: Save to CSV
     # save_courses_to_csv(courses)
