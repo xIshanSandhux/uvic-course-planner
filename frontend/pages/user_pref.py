@@ -29,7 +29,7 @@ if "minor" not in st.session_state:
 if "specialization" not in st.session_state:
     st.session_state['specialization'] = ""
 if "number_of_courses" not in st.session_state:
-    st.session_state['number_of_courses'] = 1
+    st.session_state['number_of_courses'] = 0
 if "student_status" not in st.session_state:
     st.session_state['student_status'] = "Please Select an Option"
 if "degree_type" not in st.session_state:
@@ -69,7 +69,7 @@ st.session_state['specialization'] = st.text_input("Specialization (optional)", 
 col1, col2 = st.columns(2)
 
 with col1:
-    core = st.number_input(
+        core = st.number_input(
         "How many core courses do you want to take?",
         min_value=0,
         max_value=8,
@@ -80,7 +80,7 @@ with col1:
     )
 
 with col2:
-    elective = st.number_input(
+        elective = st.number_input(
         "How many elective courses do you want to take?",
         min_value=0,
         max_value=8,
@@ -90,7 +90,7 @@ with col2:
         key="elective_courses"
     )
 
-total_courses = core + elective
+total_courses =core+elective
 if total_courses >= 8:
     st.warning('Total number of courses cannot exceed 8')
 else:

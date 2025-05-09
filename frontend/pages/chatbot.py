@@ -37,10 +37,10 @@ minor = st.session_state.get('minor', '')
 specialization = st.session_state.get('specialization', '')
 interests = st.session_state.get('interests', 'general academic fields')
 year = st.session_state.get('year', 'an unspecified year')
-number_of_courses = st.session_state['number_of_courses']
-name = st.session_state['name']
-elective_courses = st.session_state['elective_courses']
-core_courses = st.session_state['core_courses']
+number_of_courses = st.session_state.get('number of courses','0')
+name = st.session_state.get('name')
+elective_courses = st.session_state.get('elective_courses')
+core_courses = st.session_state.get('core_courses')
 
 # Handle minor
 if minor:

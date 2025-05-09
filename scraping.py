@@ -29,11 +29,11 @@ async def run():
 
         # 6️⃣ Work with the Subject dropdown
         await page.click("#s2id_txt_subject")
-        await page.fill(".select2-input", "CSC")
-        await page.click("#CSC")
+        await page.fill(".select2-input", "SENG")
+        await page.click("#SENG")
 
         # 7️⃣ Enter the course number
-        await page.fill("#txt_courseNumber", "360")
+        await page.fill("#txt_courseNumber", "426")
 
         # 8️⃣ Click the Search button
         await page.click("#search-go")

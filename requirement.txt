@@ -9,3 +9,4 @@ python-dotenv
 databases
 asyncpg
 beautifulsoup4
+sqlalchemy>=2.0
