@@ -1,0 +1,1 @@
+[0510/225840.175:INFO:CONSOLE:342] "Uncaught Error: cannot call methods on tooltip prior to initialization; attempted to call method 'close'", source: https://banner.uvic.ca/StudentRegistrationSsb/assets/modules/jquery-370-mf.js (342)

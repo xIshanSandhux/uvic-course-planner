@@ -6,32 +6,36 @@ import re
 import requests
 
 
-# def course_not_comp():
-#     courses_completed = requests.get("http://127.0.0.1:8000/courses_completed").text
-#     completed_courses_list =  [c.strip() for c in courses_completed.split(",")]
-#     # print("hello course compl: ", courses_completed)
+async def course_not_comp():
+    courses_completed = requests.get("http://127.0.0.1:8000/courses_completed").text
+    completed_courses_list =  [c.strip() for c in courses_completed.split(",")]
+    # print("hello course compl: ", courses_completed)
 
-#     course_list = requests.get("http://127.0.0.1:8000/course_list").text
-#     course_list_l = [c.strip() for c in course_list.split(",")]
-#     # print("hello course list: ", lt1)
+    course_list = requests.get("http://127.0.0.1:8000/course_list").text
+    course_list_l = [c.strip() for c in course_list.split(",")]
+    # print("hello course list: ", lt1)
 
-#     course_not_comp = []
-#     for course in course_list_l:
-#         if course not in completed_courses_list:
-#             course_not_comp.append(course)
+    course_not_comp = []
+    for course in course_list_l:
+        if course not in completed_courses_list:
+            course_not_comp.append(course)
+    course_avail = []
+    for course in course_not_comp:
+        match = re.match(r"([A-Z]+)(\d+):", course)
+        if match:
+            subject = match.group(1)
+            number = match.group(2)
+            print(f"Subject: {subject}, Number: {number}")
+            avail = await run(subject,number)
+            if avail:
+                course_avail.append(course)
+    print(course_avail)
 
-#     for course in course_not_comp:
-#         match = re.match(r"([A-Z]+)(\d+):", course)
-#         if match:
-#             subject = match.group(1)
-#             number = match.group(2)
-#             print(f"Subject: {subject}, Number: {number}")
-
-async def run(subject: str, courseNumber: str):
+async def run(subject: str,courseNumber: str):
     async with async_playwright() as p:
         # ✅ 1️⃣ Define the user data directory (profile storage)
         user_data_dir = str(Path.cwd() / "playwright-temp-profile")
-        print(f"Using profile: {user_data_dir}")
+        # print(f"Using profile: {user_data_dir}")
 
         # ✅ 2️⃣ Launch *persistent context* for real tabs in one window
         context = await p.chromium.launch_persistent_context(
@@ -55,10 +59,10 @@ async def run(subject: str, courseNumber: str):
         # 6️⃣ Work with the Subject dropdown
         await page.click("#s2id_txt_subject")
         await page.fill(".select2-input", subject)
-        await page.click("#SENG")
+        await page.click(f"#{subject}")
 
-        # 7️⃣ Enter the course number
-        await page.fill("#txt_courseNumber", courseNumber)
+        # # 7️⃣ Enter the course number
+        # await page.fill("#txt_courseNumber", courseNumber)
 
         # 8️⃣ Click the Search button
         await page.click("#search-go")
@@ -74,13 +78,21 @@ async def run(subject: str, courseNumber: str):
 
         # Get the raw JSON string from the body
         raw_json = await new_page.evaluate("document.body.innerText")
-
+        avail = False
         # Parse the JSON using Python
         data = json.loads(raw_json)
+       
         if data['totalCount']>0:
-            print("hello")
+            avail = True
+            # return True
+            print("course avail this term")
+        elif data['totalCount']==0:
+            avail = False
+            print("course not avail this term")
 
         await context.close()
+        return avail
 
 # ✅ Run the async function
-asyncio.run(run("SENG","426"))
+asyncio.run(course_not_comp())
+# asyncio.run(run("SENG"))
