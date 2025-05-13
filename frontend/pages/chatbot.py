@@ -53,6 +53,22 @@ if major == "Select a major":
 elif major:
     major_sentence = f"They have a major in {major}."
 
+# Majors that require technical, complementary, and/or natural science electives 
+eng_majors = [
+"Software Engineering",
+"Electrical Engineering",
+"Computer Engineering",
+"Biomedical Engineering",
+"Mechanical Engineering",
+"Civil Engineering",
+]
+
+# If their major is eng, add elective question
+if major in eng_majors:
+    extra_major_prompt = (
+        "How many technical, complementary, and/or natural science electives would you like to take this term?"
+    )
+
 # Handle specialization
 if specialization:
     specialization_sentence = f"They have a specialization in {specialization}."
@@ -79,7 +95,7 @@ coop_planned   = st.session_state.get("coop_planned", 0)
 
 # Now create the full system prompt
 system_prompt = f"""
-You are a kind and helpful UVic course planning assistant expert.
+You are a kind and helpful UVic course planning assistant expert. If you need additional information, you can ask them before providing the most accurate possible recommendation/help.
 {major_sentence}
 {minor_sentence}
 {specialization_sentence}
@@ -94,6 +110,10 @@ Since they’re looking to do more co-op, you can either tailor course suggestio
 
 Always ensure prerequisites are met, workloads are balanced, and their interests are supported.
 Speak in a friendly and encouraging tone. Personalize your responses by addressing the student by their name: {name}.
+
+Possible questions to ask:
+{extra_major_prompt}
+
 """
 
 
