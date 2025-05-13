@@ -1,97 +1,105 @@
+# backend/api/decode.py
 import html
-from bs4 import BeautifulSoup
+import json
 import requests
-from fastapi import APIRouter
+from bs4 import BeautifulSoup
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from ..db import database  # relative import from backend/db.py
 
-
-# Create router
 router = APIRouter()
 
 class ExtractRequest(BaseModel):
     major: str
 
-# Gets the pid for the program the user has selected in the form
-def get_program_pid(major: str):
+def get_program_pid(major: str) -> str:
+    """Lookup the program pid for a given major title."""
     endpoint = "https://uvic.kuali.co/api/v1/catalog/programs/67855445a0fe4e9a3f0baf82"
+    resp = requests.get(endpoint)
+    if not resp.ok:
+        raise HTTPException(status_code=502, detail="Failed to fetch program list")
+    for program in resp.json():
+        if program.get("title") == major:
+            return program["pid"]
+    raise HTTPException(status_code=404, detail=f"Program '{major}' not found")
 
-    response = requests.get(endpoint)
-    if response.status_code == 200:
-        data_program_pid = response.json()
-        # print(data_program_pid)
-    for program in data_program_pid:
-        if program['title'] ==major:
-            return program['pid']
-            # print(program['title'], program["pid"])
-
-# Gets the course list for the major the user entered
-def get_major_data(major: str):
-
-    pid = get_program_pid(major)
-    print("pid: ", pid)
+def parse_program_requirements(pid: str):
+    """Fetch & decode the HTML program requirements into code/description pairs."""
     endpoint = f"https://uvic.kuali.co/api/v1/catalog/program/67855445a0fe4e9a3f0baf82/{pid}"
+    resp = requests.get(endpoint)
+    if not resp.ok:
+        raise HTTPException(status_code=502, detail="Failed to fetch program requirements")
+    raw_html = resp.json().get("programRequirements", "")
+    # Decode escaped unicode + HTML entities
+    decoded = raw_html.encode().decode("unicode_escape")
+    clean    = html.unescape(decoded)
+    soup     = BeautifulSoup(clean, "html.parser")
 
-    response = requests.get(endpoint)
-    if response.status_code==200:
-        data = response.json()
+    courses = []
+    for li in soup.find_all("li"):
+        # only leaf items (no nested <ul>)
+        if li.find("ul"):
+            continue
 
-    # getting raw encoded program courses 
-    raw_program_req = data["programRequirements"]
+        a_tag = li.find("a")
+        if a_tag and a_tag.text.strip():
+            code = a_tag.text.strip()
+            full = li.get_text(" ").strip()
+            # strip the code off the front of the text
+            desc = full[len(code):].strip(" -–:") if full.startswith(code) else full
+        else:
+            # plain‐text elective or heading
+            code = None
+            desc = li.get_text(" ").strip()
 
-    # Decode Unicode escapes (turns \u003C into <)
-    decoded_program = raw_program_req.encode().decode('unicode_escape')
+        courses.append({"code": code, "description": desc})
 
-    # Unescape any HTML entities (like &lt; into <)
-    clean_html = html.unescape(decoded_program)
+    # dedupe while preserving order
+    seen = set()
+    out  = []
+    for c in courses:
+        key = (c["code"], c["description"])
+        if key not in seen:
+            seen.add(key)
+            out.append(c)
+    return out
 
-    soup = BeautifulSoup(clean_html, 'html.parser')
-
-    # storing all the program courses in this list
-    course_list = []
-
-    # Loop through all <li> tags
-    for li in soup.find_all('li'):
-        # Only process leaf <li> (no inner <ul>)
-        if not li.find('ul'):
-            a_tag = li.find('a')
-            if a_tag and a_tag.text.strip():
-                #  if Course with <a> tag
-                course_code = a_tag.text.strip()
-                full_text = li.get_text(" ").strip()
-
-                # Clean up: remove course code from text
-                if full_text.startswith(course_code):
-                    rest_of_text = full_text[len(course_code):].strip(" -–:")
-                else:
-                    rest_of_text = full_text  # fallback
-
-                course_list.append(course_code+": "+rest_of_text)
-
-            else:
-                # CASE 2️⃣: No <a> tag, it's a plain text elective
-                elective_text = li.get_text(" ").strip()
-                course_list.append(elective_text)
-
-    # Remove duplicates while preserving order
-    course_list = list(dict.fromkeys(course_list))
-    print(course_list)
-    return course_list
-   
-
-
-# main API
 @router.post("/extract_courses")
-def extracted_courses(req:ExtractRequest):
+async def extracted_courses(req: ExtractRequest):
+    """Fetch, parse, upsert into DB, and return the inserted course codes."""
+    # 1) Find the program PID
+    pid = get_program_pid(req.major)
 
-    try:
-        return get_major_data(req.major)
-        # print()
-    except Exception as e:
-        return {"error": str(e)}
+    # 2) Parse HTML into structured list
+    course_list = parse_program_requirements(pid)
 
+    # 3) Upsert each into your `courses` table
+    upserted = []
+    for item in course_list:
+        code = item["code"] or ""
+        desc = item["description"]
+        raw  = json.dumps(item)  # JSON-stringify for the JSON column
 
+        await database.execute(
+            """
+            INSERT INTO courses
+              (catalog_course_id, pid, title, credits, major, raw_json)
+            VALUES
+              (:cid, :pid, :title, :credits, :major, :raw)
+            ON CONFLICT (catalog_course_id) DO UPDATE
+              SET title    = EXCLUDED.title,
+                  raw_json = EXCLUDED.raw_json;
+            """,
+            {
+                "cid":     code,
+                "pid":     None,
+                "title":   desc,
+                "credits": 0,
+                "major":   req.major,
+                "raw":     raw,
+            },
+        )
+        upserted.append(code)
 
-
-# if __name__ == "__main__":
-#     get_major_data("Computer Engineering")
+    return {"inserted_courses": upserted}

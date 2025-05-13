@@ -1,11 +1,18 @@
-# command to run server: uvicorn backend.main:app --reload
 from fastapi import FastAPI
-from backend.api.decode import router as extract_courses_router
-from backend.api.course_complete import router as courses_completed
-
-# from api.another_api import router as another_router  # (if you have more)
+from .db import database, init_db
+from .api.decode import router as extract_courses_router
+from .api.course_complete import router as courses_completed
 
 app = FastAPI()
+
+@app.on_event("startup")
+async def startup():
+    init_db()
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 # Include all routers
 app.include_router(extract_courses_router)
