@@ -6,16 +6,17 @@ from .api.course_complete import router as courses_completed
 app = FastAPI()
 
 @app.on_event("startup")
-async def startup():
+async def on_startup():
+    # 1) ensure the tables exist (safe to run every time)
     init_db()
+    # 2) open your async Database connection
     await database.connect()
 
 @app.on_event("shutdown")
-async def shutdown():
+async def on_shutdown():
+    # cleanly close your DB connection
     await database.disconnect()
 
-# Include all routers
+# include your existing routers
 app.include_router(extract_courses_router)
 app.include_router(courses_completed)
-
-# app.include_router(another_router)  # (optional if you have more)
