@@ -23,6 +23,18 @@ courses = Table(
     Column("raw_json", JSON),
 )
 
+courses_main = Table(
+    "courses_main",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("pid", String, index=True, unique=True),
+    Column("course_code", String, nullable=True, index=True),
+    Column("course_name", String, nullable=True),
+    Column("course_description", String, nullable=True),
+    Column("prerequisites", JSON, nullable=True),  # List of prerequisite
+    Column("credits", Integer, nullable=True),
+)
+
 majors = Table(
     "majors",
     metadata,
