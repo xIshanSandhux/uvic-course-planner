@@ -151,4 +151,4 @@ async def extracted_courses(req: ExtractRequest):
 
 if __name__ == "__main__":
    
-    asyncio.run(tryial("Mechanical Engineering"))
+    asyncio.run(tryial("Biomedical Engineering"))
