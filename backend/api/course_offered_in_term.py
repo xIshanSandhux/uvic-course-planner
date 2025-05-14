@@ -102,12 +102,12 @@ async def run(subject: str, courseNumber: str):
 # ✅ Run the async function
 asyncio.run(course_not_comp())
 
-# main API
-@router.post("/offeredinterm")
-def extracted_courses(req:ExtractRequest):
+# # main API
+# @router.post("/offeredinterm")
+# def extracted_courses(req:ExtractRequest):
 
-    try:
-        return get_major_data(req.major)
-        # print()
-    except Exception as e:
-        return {"error": str(e)}
+    # try:
+    #     return get_major_data(req.major)
+    #     # print()
+    # except Exception as e:
+    #     return {"error": str(e)}

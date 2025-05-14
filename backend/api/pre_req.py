@@ -80,4 +80,4 @@ def get_course_data(course: str):
 
 
 if __name__ == "__main__":
-    get_course_data("SENG499")
+    get_course_data("SENG426")
