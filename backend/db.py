@@ -23,6 +23,18 @@ courses = Table(
     Column("raw_json", JSON),
 )
 
+majors = Table(
+    "majors",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("major", String, unique=True, index=True),
+    Column("major_pid", String, index=True),
+    Column("courses", JSON),
+)
+
 def init_db():
     engine = sqlalchemy.create_engine(DATABASE_URL)
     metadata.create_all(engine)
+
+if __name__ == "__main__":
+    init_db()

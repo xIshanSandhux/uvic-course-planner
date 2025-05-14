@@ -1,18 +1,23 @@
 # backend/api/decode.py
+# Command to run this file: python -m backend.api.decode
 import html
 import json
 import requests
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+import asyncio
 
-from ..db import database  # relative import from backend/db.py
+from backend.db import database
+  # relative import from backend/db.py
 
 router = APIRouter()
 
 class ExtractRequest(BaseModel):
     major: str
 
+
+# Helper Function to return the major pid
 def get_program_pid(major: str) -> str:
     """Lookup the program pid for a given major title."""
     endpoint = "https://uvic.kuali.co/api/v1/catalog/programs/67855445a0fe4e9a3f0baf82"
@@ -24,6 +29,8 @@ def get_program_pid(major: str) -> str:
             return program["pid"]
     raise HTTPException(status_code=404, detail=f"Program '{major}' not found")
 
+
+# Helper function to decode + return course list
 def parse_program_requirements(pid: str):
     """Fetch & decode the HTML program requirements into code/description pairs."""
     endpoint = f"https://uvic.kuali.co/api/v1/catalog/program/67855445a0fe4e9a3f0baf82/{pid}"
@@ -65,6 +72,41 @@ def parse_program_requirements(pid: str):
             out.append(c)
     return out
 
+
+# Storing Major + pid + course list in the DB
+async def tryial(major: str):
+
+    # Initating connection
+    await database.connect()
+
+    # Get Major PID
+    pid = get_program_pid(major)
+
+    # Get Major course list
+    course_list = parse_program_requirements(pid)
+
+    # Storing major name + pid + course list in the majors table
+    await database.execute(
+        """
+        INSERT INTO majors
+            (major, major_pid, courses)
+        VALUES
+            (:major, :pid, :courses)
+        ON CONFLICT (major) DO UPDATE
+            SET major_pid    = EXCLUDED.major_pid,
+                courses = EXCLUDED.courses;
+        """,
+        {
+            "major": major,
+            "pid": pid,
+            "courses": json.dumps(course_list),
+        },
+    )
+
+    # Ending Connection
+    await database.disconnect()
+
+
 @router.post("/extract_courses")
 async def extracted_courses(req: ExtractRequest):
     """Fetch, parse, upsert into DB, and return the inserted course codes."""
@@ -83,10 +125,10 @@ async def extracted_courses(req: ExtractRequest):
 
         await database.execute(
             """
-            INSERT INTO courses
-              (catalog_course_id, pid, title, credits, major, raw_json)
+            INSERT INTO majors
+              major, major_pid, courses)
             VALUES
-              (:cid, :pid, :title, :credits, :major, :raw)
+              (:major, :pid, :courses)
             ON CONFLICT (catalog_course_id) DO UPDATE
               SET title    = EXCLUDED.title,
                   raw_json = EXCLUDED.raw_json;
@@ -101,5 +143,12 @@ async def extracted_courses(req: ExtractRequest):
             },
         )
         upserted.append(code)
+        print(upserted)
 
     return {"inserted_courses": upserted}
+
+
+
+if __name__ == "__main__":
+   
+    asyncio.run(tryial("Mechanical Engineering"))
