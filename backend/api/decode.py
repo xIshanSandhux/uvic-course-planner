@@ -5,7 +5,7 @@ import json
 from sqlalchemy import select
 import requests
 from bs4 import BeautifulSoup
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import asyncio
 
@@ -75,7 +75,7 @@ def parse_program_requirements(pid: str):
 
 
 # Storing Major + pid + course list in the DB
-async def tryial(major: str):
+async def store_major_data(major: str):
 
     # Initating connection
     await database.connect()
@@ -108,7 +108,6 @@ async def tryial(major: str):
     await database.disconnect()
 
 
-
 # Gets the pid for the program the user has selected in the form
 def get_course_pid(course: str):
     endpoint = "https://uvic.kuali.co/api/v1/catalog/courses/67855445a0fe4e9a3f0baf82"
@@ -122,8 +121,9 @@ def get_course_pid(course: str):
             return program['pid']
             print(program['title'], program["pid"])
 
-# Gets the course list for the major the user entered
-async def get_course_data(major: str):
+
+# stores the course data in db (pid, course_code, course_name, prerequisites, credits,course_description)
+async def store_course_data(major: str):
 
     await database.connect()
     query = select(majors.c.courses).where(majors.c.major == major)
@@ -196,98 +196,46 @@ async def get_course_data(major: str):
     await database.disconnect()
 
 
-    # pid = get_course_pid(course)
-    # print("pid: ", pid)
-    # endpoint = f"https://uvic.kuali.co/api/v1/catalog/course/67855445a0fe4e9a3f0baf82/{pid}"
+# API which is used to get the course list
+# first it checks if the major is in the DB or not
+# if it is it will just return the courses stored in the DB
+# if it is not it stores the details for that major in the background and usee parse_program_requirements() function to send the course list
+@router.post("/extract_courses")
+async def extracted_courses(req: ExtractRequest, background_tasks: BackgroundTasks):
 
+    # postgres query
+    query = select(majors).where(majors.c.major == req.major)
+    major = await database.fetch_one(query)
 
+    # courses will be stored in this list which will be sent back to the user
+    course_list =[]
 
+    # Checking if the selected major is in the DB or not
+    if major:
 
-    # response = requests.get(endpoint)
-    # if response.status_code==200:
-    #     data = response.json()
-    #     # print(data)
+        # postgres query to get the course list of the major
+        course_query = select(majors.c.courses).where(majors.c.major == req.major)
+        course_list_db = await database.fetch_one(course_query)
 
-    # # getting raw encoded program courses 
-    # raw_program_req = data["preAndCorequisites"]
-    # # print(raw_program_req)
+        # iterating over the course list and storing them in the list
+        for course in course_list_db['courses']:
+            if course['code']:
+                course_list.append(f"{course['code']}: {course['description']}")
+            else:
+                course_list.append(course['description'])
+    else:
 
-    # # Decode Unicode escapes (turns \u003C into <)
-    # decoded_program = raw_program_req.encode().decode('unicode_escape')
+        # Running the Db storing queries in the background
+        # so that users dont have to wait
+        background_tasks.add_task(store_major_data(req.major))
+        background_tasks.add_task(store_course_data(req.major))
+        
+        # Sending the list to the user
+        list_courses = parse_program_requirements(get_program_pid(req.major))
+        for course in list_courses:
+            if course['code']:
+                course_list.append(f"{course['code']}: {course['description']}")
+            else:
+                course_list.append(course['description'])
 
-    # # Unescape any HTML entities (like &lt; into <)
-    # clean_html = html.unescape(decoded_program)
-
-    # soup = BeautifulSoup(clean_html, 'html.parser')
-
-    # prereq_blocks = []
-
-    # for li in soup.find_all("li"):
-    #     # Check if this <li> contains a nested <ul> – i.e., a grouped rule
-    #     nested = li.find("ul")
-    #     if nested:
-    #         rule_type_text = li.get_text(separator=" ", strip=True).split(":")[0]
-    #         rule = {"type": rule_type_text, "courses": []}
-    #         for nested_li in nested.find_all("li"):
-    #             course = nested_li.find("a")
-    #             if course:
-    #                 rule["courses"].append(course.text.strip())
-    #         prereq_blocks.append(rule)
-    # print(prereq_blocks)
-
-
-
-
-
-
-
-
-
-
-
-
-# @router.post("/extract_courses")
-# async def extracted_courses(req: ExtractRequest):
-#     """Fetch, parse, upsert into DB, and return the inserted course codes."""
-#     # 1) Find the program PID
-#     pid = get_program_pid(req.major)
-
-#     # 2) Parse HTML into structured list
-#     course_list = parse_program_requirements(pid)
-
-#     # 3) Upsert each into your `courses` table
-#     upserted = []
-#     for item in course_list:
-#         code = item["code"] or ""
-#         desc = item["description"]
-#         raw  = json.dumps(item)  # JSON-stringify for the JSON column
-
-#         await database.execute(
-#             """
-#             INSERT INTO majors
-#               major, major_pid, courses)
-#             VALUES
-#               (:major, :pid, :courses)
-#             ON CONFLICT (catalog_course_id) DO UPDATE
-#               SET title    = EXCLUDED.title,
-#                   raw_json = EXCLUDED.raw_json;
-#             """,
-#             {
-#                 "cid":     code,
-#                 "pid":     None,
-#                 "title":   desc,
-#                 "credits": 0,
-#                 "major":   req.major,
-#                 "raw":     raw,
-#             },
-#         )
-#         upserted.append(code)
-#         print(upserted)
-
-#     return {"inserted_courses": upserted}
-
-
-
-if __name__ == "__main__":
-   
-    asyncio.run(get_course_data("Software Engineering"))
+    return course_list
