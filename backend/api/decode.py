@@ -227,8 +227,8 @@ async def extracted_courses(req: ExtractRequest, background_tasks: BackgroundTas
 
         # Running the Db storing queries in the background
         # so that users dont have to wait
-        background_tasks.add_task(store_major_data(req.major))
-        background_tasks.add_task(store_course_data(req.major))
+        background_tasks.add_task(store_major_data,req.major)
+        background_tasks.add_task(store_course_data,req.major)
         
         # Sending the list to the user
         list_courses = parse_program_requirements(get_program_pid(req.major))
