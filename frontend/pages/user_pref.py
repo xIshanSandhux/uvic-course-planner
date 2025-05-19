@@ -155,9 +155,9 @@ if year_sel in ["Year 2", "Year 3", "Year 4"]:
 # Extracting the course list of the student
 course_list = []
 major = st.session_state['major']
-print(major)
+# print(major)
 prev_major = st.session_state['prev_major']
-print(prev_major)
+# print(prev_major)
 # or st.session_state['courses'] == []
 if (prev_major!= major and major != "Select a Major"):
         try:
@@ -184,7 +184,7 @@ if (prev_major!= major and major != "Select a Major"):
         st.session_state['prev_major'] = major
 
 # st.session_state['courses'] = course_list
-print(st.session_state['courses'])
+# print(st.session_state['courses'])
 
 if st.session_state['courses'] !=[] or st.session_state['major']!="Select a Major":
     next_button = st.button("Next")

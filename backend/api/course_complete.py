@@ -33,7 +33,7 @@ def courses_completed(req:ExtractRequest):
         courses_completed = req.courses
         courses_completed_str = ", ".join(courses_completed)
         st.session_state['course_completed'] = courses_completed_str
-        print(courses_completed_str)
+        # print(courses_completed_str)
     except Exception as e:
         return {"error": str(e)}
 

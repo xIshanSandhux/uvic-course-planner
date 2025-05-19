@@ -40,38 +40,38 @@ async def course_not_comp():
 
 async def run(subject: str, courseNumber: str):
     async with async_playwright() as p:
-        # ✅ 1️⃣ Define the user data directory (profile storage)
+        # Define the user data directory (profile storage)
         user_data_dir = str(Path.cwd() / "playwright-temp-profile")
         # print(f"Using profile: {user_data_dir}")
 
-        # ✅ 2️⃣ Launch *persistent context* for real tabs in one window
+        # Launch *persistent context* for real tabs in one window
         context = await p.chromium.launch_persistent_context(
             user_data_dir,
             headless=False,
         )
 
-        # ✅ 3️⃣ Get the first (default) page
+        # Get the first (default) page
         page = context.pages[0]
 
-        # 4️⃣ Go to the search page
+        # Go to the search page
         await page.goto("https://banner.uvic.ca/StudentRegistrationSsb/ssb/classSearch/classSearch")
 
-        # 5️⃣ Work with the Term dropdown
+        # Work with the Term dropdown
         await page.click("#classSearchLink")
         await page.click("#s2id_txt_term")
         await page.fill(".select2-input", "Summer")
         await page.click(r"#\32 02505")
         await page.click("#term-go")
 
-        # 6️⃣ Work with the Subject dropdown
+        # Work with the Subject dropdown
         await page.click("#s2id_txt_subject")
         await page.fill(".select2-input", subject)
         await page.click(f"#{subject}")
 
-        # 7️⃣ Enter the course number
+        # Enter the course number
         await page.fill("#txt_courseNumber", courseNumber)
 
-        # 8️⃣ Click the Search button
+        # Click the Search button
         await page.click("#search-go")
 
         # await asyncio.sleep(10)
