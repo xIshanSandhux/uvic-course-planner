@@ -6,38 +6,51 @@ import re
 import requests
 from fastapi import APIRouter
 from pydantic import BaseModel
+from sqlalchemy import select, update
 
-
+from backend.db import database, courses_main,majors
+  # relative import from backend/db.py
 
 # Create router
 router = APIRouter()
 
 
-async def course_not_comp():
-    courses_completed = requests.get("http://127.0.0.1:8000/courses_completed").text
-    completed_courses_list =  [c.strip() for c in courses_completed.split(",")]
-    # print("hello course compl: ", courses_completed)
 
-    course_list = requests.get("http://127.0.0.1:8000/course_list").text
-    course_list_l = [c.strip() for c in course_list.split(",")]
-    # print("hello course list: ", lt1)
+# Fetching all the courses form the DB
+async def db_courses():
+    # await database.connect()
+    query = select(courses_main)
+    courses = await database.fetch_all(query)
+    # await database.disconnect()
+    return courses
 
-    course_not_comp = []
-    for course in course_list_l:
-        if course not in completed_courses_list:
-            course_not_comp.append(course)
+
+# calls the both the helper functions to check if the course is offered in the term or not 
+async def courses_offered_in_term():
+    await database.connect()
+    all_courses = await db_courses()
     course_avail = []
-    for course in course_not_comp:
-        match = re.match(r"([A-Z]+)(\d+):", course)
+
+    for course in all_courses:
+        match = re.match(r"([A-Z]+)(\d+)", course['course_code'])
+        print(course['course_code'])
         if match:
             subject = match.group(1)
             number = match.group(2)
             print(f"Subject: {subject}, Number: {number}")
             avail = await run(subject, number)
-            if avail:
-                course_avail.append(course)
-    print(course_avail)
 
+            query = (
+                update(courses_main)
+                .where(courses_main.c.pid == course['pid'])
+                .values(Summer=avail)
+                )
+            await database.execute(query)
+    await database.disconnect()
+   
+
+# Helper Function which runs the playwright script for each course
+# currently only checking if offered in summer 2025
 async def run(subject: str, courseNumber: str):
     async with async_playwright() as p:
         # Define the user data directory (profile storage)
@@ -98,16 +111,58 @@ async def run(subject: str, courseNumber: str):
 
         await context.close()
         return avail
+    
+
+async def course_not_comp():
+    await database.connect()
+    courses_completed = requests.get("http://127.0.0.1:8000/courses_completed").text
+    completed_courses_list =  [c.strip() for c in courses_completed.split(",")]
+    # print("hello course compl: ", courses_completed)
+
+    course_list = requests.get("http://127.0.0.1:8000/course_list").text
+    course_list_l = [c.strip() for c in course_list.split(",")]
+    # print("hello course list: ", lt1)
+
+    course_not_comp = []
+    for course in course_list_l:
+        if course not in completed_courses_list:
+            course_not_comp.append(course)
+    # print(course_not_comp)
+    course_avail =[]
+    for course in course_not_comp:
+        match = re.search(r"\b[A-Z]{3,4}\d{3}\b", course)
+        if match:
+            query = select(courses_main).where(courses_main.c.course_code == match.group(0))
+            course_db = await database.fetch_one(query)
+            if course_db['Summer'] is True:
+                print(course)
+                course_avail.append(course)
+        else:
+            course_avail.append(course)
+    
+    print(course_avail)
+        
+
+    # for course in course_not_comp:
+    #     await database.connect()
+    #     query = select(courses_main).where(courses_main.c.course_code == course)
+    #     course_list = await database.fetch_one(query)
+    # course_avail = []
+    # for course in course_not_comp:
+    #     match = re.match(r"([A-Z]+)(\d+):", course)
+    #     if match:
+    #         subject = match.group(1)
+    #         number = match.group(2)
+    #         print(f"Subject: {subject}, Number: {number}")
+    #         avail = await run(subject, number)
+    #         if avail:
+    #             course_avail.append(course)
+
+
 
 # ✅ Run the async function
 asyncio.run(course_not_comp())
 
-# # main API
-# @router.post("/offeredinterm")
-# def extracted_courses(req:ExtractRequest):
 
-    # try:
-    #     return get_major_data(req.major)
-    #     # print()
-    # except Exception as e:
-    #     return {"error": str(e)}
+# if __name__ == "__main__":
+#     init_db()

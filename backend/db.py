@@ -1,6 +1,6 @@
 import os
 import sqlalchemy
-from sqlalchemy import MetaData, Table, Column, Integer, String, JSON
+from sqlalchemy import MetaData, Table, Column, Integer, String, JSON, Boolean
 from databases import Database
 from dotenv import load_dotenv
 
@@ -33,6 +33,8 @@ courses_main = Table(
     Column("course_description", String, nullable=True),
     Column("prerequisites", JSON, nullable=True),  # List of prerequisite
     Column("credits", Integer, nullable=True),
+    Column("Summer", Boolean, nullable=True),
+
 )
 
 majors = Table(
