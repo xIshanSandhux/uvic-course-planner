@@ -9,7 +9,10 @@ import requests
 courses_completed =  requests.get("http://127.0.0.1:8000/courses_completed")
 courses_com = courses_completed.json()
 course_all = (requests.get("http://127.0.0.1:8000/course_list")).json()
-print("courses: ",courses_com)
+# print("courses: ",courses_com)
+course_offered = requests.get("http://127.0.0.1:8000/courses_not_completed").json()
+print("courses to comp: ",course_offered)
+
 
 # --- PAGE SETTINGS ---
 st.set_page_config(
