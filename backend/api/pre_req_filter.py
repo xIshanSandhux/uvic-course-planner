@@ -28,7 +28,7 @@ async def pre_req_fetch(course: str):
 
 async def pre_req_check():
     # courses = ['CSC115: Fundamentals of Programming II   (1.5)', 'MATH109: Introduction to Calculus   (1.5)', 'CHEM150: Engineering Chemistry   (1.5)', 'CSC230: Introduction to Computer Architecture   (1.5)', 'CSC225: Algorithms and Data Structures I   (1.5)', 'ECE260: Continuous-Time Signals and Systems   (1.5)', 'ECE310: Digital Signal Processing I   (1.5)', 'ECON180: Introduction to Economics and Financial Project Evaluation   (1.5)', 'MATH122: Logic and Foundations   (1.5)', 'SENG265: Software Development Methods   (1.5)', 'SENG275: Software Testing   (1.5)', 'SENG310: Human Computer Interaction   (1.5)', 'STAT260: Introduction to Probability and Statistics I   (1.5)', 'Complete  3.0  units of:  Complementary Studies Electives (see note below)', 'CSC226: Algorithms and Data Structures II   (1.5)', 'CSC320: Foundations of Computer Science   (1.5)', 'CSC360: Operating Systems   (1.5)', 'CSC370: Database Systems   (1.5)', 'SENG426: Software Quality Engineering   (1.5)', 'SENG440: Embedded Systems   (1.5)', 'SENG499: Design Project II   (3)']
-    courses = ["CSC225: Algorithms and Data Structures I   (1.5)"
+    courses = ["SENG310: Human Computer Interaction   (1.5)"
 ]
     course_comp = [
     # 1st Year
@@ -41,7 +41,7 @@ async def pre_req_check():
     "ECE260: Continuous-Time Signals and Systems   (1.5)",
     "ECE310: Digital Signal Processing I   (1.5)",
     "MATH122: Logic and Foundations   (1.5)",
-    "SENG265: Software Development Methods   (1.5)",
+    # "SENG265: Software Development Methods   (1.5)",
 ]
     
     course_codes = []
@@ -59,16 +59,21 @@ async def pre_req_check():
             if "Complete 1 of" == pre['type']:
                 if not any(c in pre['courses'] for c in course_codes):
                     avail = False
-                    # print(course," can be done by user")
+                    # print(course" can be done by user")
                     # print(pre)
                     # print(" ")
-        if avail==False:
-            print(f"{course} cannot be dne by user")
-        else:
+                    if avail==False:
+                        print(f"{course} cannot be dne by user")
+            elif "Complete all of" == pre['type']:
+                for c in pre['courses']:
+                    if c not in course_codes:
+                        avail = False
+                        if avail==False:
+                            print(f"{course} cannot be dne by user")
+                            break
+        if avail==True:
              print(f"{course} can be dne by user")
-
-
-    return 0
+        
 
 if __name__ == "__main__":
     import asyncio
