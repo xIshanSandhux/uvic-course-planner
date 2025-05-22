@@ -25,3 +25,18 @@ psql -U postgres -h localhost -p 5432
 # connect to course_planner db using course_planner_user user account
 
 \c course_planner course_planner_user
+
+# update:
+
+## For backend:
+
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+## For frontend:
+
+cd frontend
+npm install
+npm run dev

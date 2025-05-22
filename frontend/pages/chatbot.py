@@ -16,11 +16,6 @@ st.set_page_config(
 
 st.title("UVic Course Planner AI Assistant")
 
-# courses_completed =  requests.get("http://127.0.0.1:8000/courses_completed")
-# courses_com = courses_completed.json()
-# course_all = (requests.get("http://127.0.0.1:8000/course_list")).json()
-# print("courses: ",courses_com)
-
 @st.cache_data
 def get_courses_completed():
     return requests.get("http://127.0.0.1:8000/courses_completed").json()

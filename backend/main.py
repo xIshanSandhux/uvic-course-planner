@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from .db import database, init_db
 from .api.decode import router as extract_courses_router
 from .api.course_complete import router as courses_completed
+from fastapi.middleware.cors import CORSMiddleware
 # from .api.course_offered_in_term import router as courses__not_completed
 
 # import os
@@ -10,6 +11,14 @@ from .api.course_complete import router as courses_completed
 app = FastAPI()
 # Load .env variables
 # load_dotenv()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["http://localhost:5173"] for stricter rules
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def on_startup():
