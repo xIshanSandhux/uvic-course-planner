@@ -113,6 +113,8 @@ async def run(subject: str, courseNumber: str):
         return avail
     
 
+# returns the list of courses which are not completed by the user and are offered in the term
+# @router.get("/courses_not_completed")
 async def course_not_comp():
     await database.connect()
     courses_completed = requests.get("http://127.0.0.1:8000/courses_completed").text
@@ -141,26 +143,10 @@ async def course_not_comp():
             course_avail.append(course)
     
     print(course_avail)
+    # return course_avail
         
 
-    # for course in course_not_comp:
-    #     await database.connect()
-    #     query = select(courses_main).where(courses_main.c.course_code == course)
-    #     course_list = await database.fetch_one(query)
-    # course_avail = []
-    # for course in course_not_comp:
-    #     match = re.match(r"([A-Z]+)(\d+):", course)
-    #     if match:
-    #         subject = match.group(1)
-    #         number = match.group(2)
-    #         print(f"Subject: {subject}, Number: {number}")
-    #         avail = await run(subject, number)
-    #         if avail:
-    #             course_avail.append(course)
-
-
-
-# ✅ Run the async function
+# # ✅ Run the async function
 asyncio.run(course_not_comp())
 
 

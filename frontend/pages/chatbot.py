@@ -6,7 +6,6 @@ from openai import AzureOpenAI
 import requests
 import cohere
 
-
 # --- PAGE SETTINGS ---
 st.set_page_config(
     page_title="UVic Course Planner",
