@@ -41,22 +41,18 @@ Completed ${state.coop_completed || 0} co-op term(s), planning ${state.coop_plan
         temperature: 0.3,
       });
 
-      // 1️⃣ Grab the array off the `message` object
+      // Grab the array off the `message` object
       const contentArr = res.message?.content;
 
-      // 2️⃣ Inspect the raw array
-      console.log('🔥 Cohere contentArr:', contentArr);
-
-      // 3️⃣ Safely pull out the first .text
+      // Safely pull out the first .text
       let replyText = '';
       if (Array.isArray(contentArr) && contentArr.length > 0) {
         replyText = contentArr[0].text?.trim() || '';
-        console.log('🗨️  First reply:', replyText);
       } else {
         console.error('⚠️  Unexpected format for contentArr:', contentArr);
       }
 
-      // 4️⃣ Update state with that reply
+      // Update state with that reply
       setMessages([
         ...updatedMessages,
         { role: 'assistant', content: replyText }
