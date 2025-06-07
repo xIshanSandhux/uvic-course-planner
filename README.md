@@ -25,3 +25,28 @@ psql -U postgres -h localhost -p 5432
 # connect to course_planner db using course_planner_user user account
 
 \c course_planner course_planner_user
+
+# update:
+
+## For backend:
+
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+## For frontend:
+
+cd frontend
+npm install
+npm run dev
+
+# Make sure you have 2 .env files
+
+/your-project/
+├── .env ← Backend secrets (used by FastAPI)
+├── backend/
+│ └── main.py
+├── react-frontend/
+│ ├── .env ← Frontend variables (e.g., VITE_COHERE_API_KEY)
+│ └── vite.config.js

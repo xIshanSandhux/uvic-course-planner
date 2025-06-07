@@ -2,6 +2,8 @@
 .streamlit/
 .env
 
+react-frontend/.env
+
 # virtual env
 venv/
 
