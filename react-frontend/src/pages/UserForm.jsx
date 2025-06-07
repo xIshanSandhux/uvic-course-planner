@@ -36,15 +36,30 @@ export default function UserForm() {
     if (form.major === "Select a Major") return alert("Please select a major");
     if (total_courses > 8) return alert("Total number of courses cannot exceed 8");
 
+    console.log("📤 Submitting form data:", form); // log the form state
+
     try {
       const res = await axios.post("http://127.0.0.1:8000/extract_courses", { major: form.major });
       const courses = res.data;
+
+      console.log("✅ Extracted course list:", courses);
+
       await axios.post("http://127.0.0.1:8000/course_list", { courses });
+      console.log("✅ Sent course list to backend.");
 
       const target = form.student_status === "Yes" ? "/courses" : "/chat";
-      navigate(target, { state: { ...form, courses } });
+
+      const nextState = {
+        ...form,
+        courses
+      };
+      console.log("🚀 Navigating to", target, "with state:", nextState);
+
+      navigate(target, { state: nextState });
+
     } catch (err) {
       alert("Something went wrong: " + err.message);
+      console.error("❌ Submission error:", err);
     }
   };
 

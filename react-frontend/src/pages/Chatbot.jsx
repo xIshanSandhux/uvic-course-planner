@@ -1,22 +1,98 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { client } from '../utils/cohereClient';
+import axios from 'axios';
 
 export default function Chatbot() {
   const { state } = useLocation();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const bottomRef = useRef(null);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [fullCourseList, setFullCourseList] = useState([]);
+  const [courseData, setCourseData] = useState({ completed: "", courseList: "" });
 
-  const systemPrompt = `You are a kind and helpful UVic course planning assistant expert.
-Major: ${state.major}
-Minor: ${state.minor || "None"}
-Specialization: ${state.specialization || "None"}
-Interests: ${state.interests || "general academic fields"}
-Completed courses: ${state.selectedCourses?.join(", ") || "None"}
-Year: ${state.year}
-Elective courses: ${state.elective_courses}, Core courses: ${state.core_courses}
-Completed ${state.coop_completed || 0} co-op term(s), planning ${state.coop_planned || 0}.`;
+  useEffect(() => {
+    const fetchCourseContext = async () => {
+      const [compRes, listRes] = await Promise.all([
+        axios.get("http://127.0.0.1:8000/courses_completed"),
+        axios.get("http://127.0.0.1:8000/course_list"),
+      ]);
+      setCourseData({
+        completed: compRes.data,
+        courseList: listRes.data,
+      });
+    };
+    fetchCourseContext();
+  }, []);
+
+  useEffect(() => {
+    if (state?.selectedCourses) setSelectedCourses(state.selectedCourses);
+    if (state?.fullCourseList) setFullCourseList(state.fullCourseList);
+
+    console.log("✅ Loaded from route state:");
+    console.log("✅ selectedCourses:", state.selectedCourses);
+    console.log("✅ fullCourseList:", state.fullCourseList);
+  }, [state]);
+
+  let yearInstructions = "There are no extra instructions.";
+  if (state.year === "First Year") {
+    yearInstructions = "Focus on suggesting introductory-level courses and electives with few prerequisites.";
+  } else if (state.year === "Second Year") {
+    yearInstructions = "Suggest a mix of core required courses and electives assuming first-year prerequisites are completed.";
+  } else if (state.year === "Third Year") {
+    yearInstructions = "Suggest upper-level electives and core courses, and help them explore specialization paths.";
+  } else if (state.year === "Fourth Year") {
+    yearInstructions = "Focus on capstone projects, final graduation requirements, and any outstanding electives.";
+  }
+
+  const systemPrompt = `
+  You are a kind and helpful UVic course planning assistant expert.
+
+  🎓 This assistant is strictly for current or prospective **UVic students**.
+  Only suggest **official UVic courses** that are part of UVic’s curriculum.
+
+  Here is the student's information:
+  - Name: ${state.name}
+  - Major: ${state.major || "an unspecified major"}
+  - Minor: ${state.minor || "None"}
+  - Specialization: ${state.specialization || "None"}
+  - Academic Interests: ${state.interests || "general academic fields"}
+  - Degree Type: ${state.degree_type}
+  - Year Level: ${state.year || "unspecified"}
+  - ${yearInstructions}
+  - Completed Co-op: ${state.coop_completed || 0}, Planned Co-op: ${state.coop_planned || 0}
+  - Completed Courses: ${state.selectedCourses?.join(", ") || "None"}
+  - Program Course List: ${state.fullCourseList?.join(", ") || "Not provided"}
+
+  📚 The student plans to take:
+  - ${state.core_courses} core course(s)
+  - ${state.elective_courses} elective course(s)
+
+  👉 Your task:
+  - Recommend a total of ${state.core_courses + state.elective_courses} **UVic courses**
+  - Choose core courses from the student’s major and program course list
+  - Choose electives from outside the core list that align with their interests or provide breadth
+  - Avoid recommending already completed courses
+  - Make sure prerequisites are met
+  - Adjust difficulty based on year level (e.g., don’t suggest 400-level courses to first-years)
+
+  ✍️ Response Format (strictly follow this):
+  1. [Course Code] - [Course Title] (Core or Elective)
+
+  Example:
+  1. CSC 225 - Algorithms and Data Structures I (Core)
+  2. CSC 226 - Algorithms and Data Structures II (Core)
+  3. PHIL 161 - Introduction to Logic (Elective)
+
+  💡 Use a friendly and clear tone. Keep the recommendations concise.
+  Do **not** suggest non-UVic courses. Do **not** make up course codes.
+  If you're unsure, politely ask the student for clarification before continuing.
+  `;
+
+  // console.log("Debug Info:");
+  // console.log("state.core_courses:", state?.core_courses);
+  // console.log("state.selectedCourses:", state.selectedCourses);
+  // console.log("state.fullCourseList:", state.fullCourseList);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -35,34 +111,32 @@ Completed ${state.coop_completed || 0} co-op term(s), planning ${state.coop_plan
     ];
 
     try {
-      const res = await client.chat({
-        model: 'command-r',
-        messages: messagesForCohere,
-        temperature: 0.3,
+      const res = await fetch('http://localhost:8000/cohere/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: messagesForCohere }),
       });
 
-      // Grab the array off the `message` object
-      const contentArr = res.message?.content;
+      const data = await res.json();
+      const contentArr = data?.content;
 
-      // Safely pull out the first .text
       let replyText = '';
       if (Array.isArray(contentArr) && contentArr.length > 0) {
         replyText = contentArr[0].text?.trim() || '';
       } else {
-        console.error('⚠️  Unexpected format for contentArr:', contentArr);
+        console.error('⚠️ Unexpected format for contentArr:', contentArr);
+        replyText = "Sorry, I didn't understand that.";
       }
 
-      // Update state with that reply
       setMessages([
         ...updatedMessages,
         { role: 'assistant', content: replyText }
       ]);
     } catch (e) {
-      console.error('Cohere error:', e);
-      alert('❌ Error talking to Cohere: ' + e.message);
+      console.error('Cohere backend error:', e);
+      alert('❌ Error talking to backend: ' + e.message);
     }
   };
-
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -71,7 +145,10 @@ Completed ${state.coop_completed || 0} co-op term(s), planning ${state.coop_plan
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([
-        { role: 'CHATBOT', content: '👋 Hi! I’m your UVic course planning assistant. Ask me anything about course selection!' }
+        {
+          role: 'assistant',
+          content: `Hi ${state.name}, I’ll help you with your UVic course planning. Ask me anything about course selection!`
+        }
       ]);
     }
   }, []);

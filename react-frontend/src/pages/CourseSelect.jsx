@@ -23,12 +23,37 @@ export default function CourseSelect() {
 
   const handleSubmit = async () => {
     try {
-      await axios.post("http://127.0.0.1:8000/courses_completed", { courses: selectedCourses });
-      navigate("/chat", { state: { ...state, selectedCourses } });
+      // 1. POST selected (completed) courses
+      await axios.post("http://127.0.0.1:8000/courses_completed", {
+        courses: selectedCourses,
+      });
+
+      // 2. POST full course list (based on extracted major)
+      await axios.post("http://127.0.0.1:8000/course_list", {
+        courses: courses,
+      });
+
+      // 3. Navigate to chatbot with all relevant state
+      console.log("Navigating to /chat with state:", {
+        ...state,
+        selectedCourses,
+        fullCourseList: courses
+      });
+      navigate("/chat", {
+        state: {
+          ...state, // name, major, minor, etc. from UserForm
+          selectedCourses, // specifically completed ones
+          fullCourseList: courses, // can optionally use in Chatbot.jsx prompt too
+        }
+      });
     } catch (err) {
-      alert("Failed to submit courses: " + err.message);
+      alert("❌ Failed to submit courses: " + err.message);
+      console.error("Course submit error:", err);
     }
   };
+
+  console.log("selectedCourses being sent:", selectedCourses);
+  console.log("courses being sent as fullCourseList:", courses);
 
   return (
     <div className="flex min-h-screen w-screen bg-gradient-to-b from-blue-600 to-blue-900 text-white">

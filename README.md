@@ -40,3 +40,13 @@ pip install -r requirements.txt
 cd frontend
 npm install
 npm run dev
+
+# Make sure you have 2 .env files
+
+/your-project/
+├── .env ← Backend secrets (used by FastAPI)
+├── backend/
+│ └── main.py
+├── react-frontend/
+│ ├── .env ← Frontend variables (e.g., VITE_COHERE_API_KEY)
+│ └── vite.config.js
