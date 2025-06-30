@@ -115,7 +115,7 @@ export default function Chatbot() {
     ];
 
     try {
-      const res = await fetch('http://localhost:8000/cohere/chat', {
+      const res = await fetch('http://localhost:8000/google/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: messagesForCohere }),

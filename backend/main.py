@@ -1,11 +1,10 @@
 from dotenv import load_dotenv
-load_dotenv()  # ✅ Must come before any os.getenv() calls
-
 from fastapi import FastAPI
 from .db import database, init_db
-from .api.extract_courses import router as extract_courses_router
-from .api.course_complete import router as courses_completed_and_not_completed
-from .api.cohere_chat import router as cohere_router
+from .api.courses.extract_courses import router as extract_courses_router
+from .api.courses.course_complete import router as courses_completed_and_not_completed
+from .api.llm.cohere_chat import router as cohere_router
+from .api.llm.google_gemma_chat import router as google_gemma_chat_router
 from fastapi.middleware.cors import CORSMiddleware
 
 import os
@@ -43,3 +42,4 @@ async def on_shutdown():
 app.include_router(extract_courses_router)
 app.include_router(courses_completed_and_not_completed)
 app.include_router(cohere_router)
+app.include_router(google_gemma_chat_router)
