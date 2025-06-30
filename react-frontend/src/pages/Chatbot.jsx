@@ -9,7 +9,7 @@ export default function Chatbot() {
   const bottomRef = useRef(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [fullCourseList, setFullCourseList] = useState([]);
-  const [courseData, setCourseData, notCompleted] = useState({ completed: "", courseList: "", notCompleted: "" });
+  const [courseData, setCourseData, notCompleted] = useState({ completed: "", courseList: "", notCompleted: ""});
 
   useEffect(() => {
     const fetchCourseContext = async () => {
@@ -17,6 +17,7 @@ export default function Chatbot() {
         axios.get("http://127.0.0.1:8000/courses_completed"),
         axios.get("http://127.0.0.1:8000/course_list"),
         axios.get("http://127.0.0.1:8000/courses_not_completed"),
+        axios.get("http://127.0.0.1:8000/pre_req_check"),
       ]);
       setCourseData({
         completed: compRes.data,
@@ -26,6 +27,10 @@ export default function Chatbot() {
     };
     fetchCourseContext();
   }, []);
+
+  
+
+
 
   useEffect(() => {
     if (state?.selectedCourses) setSelectedCourses(state.selectedCourses);
