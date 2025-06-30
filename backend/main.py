@@ -3,8 +3,8 @@ load_dotenv()  # ✅ Must come before any os.getenv() calls
 
 from fastapi import FastAPI
 from .db import database, init_db
-from .api.decode import router as extract_courses_router
-from .api.course_complete import router as courses_completed
+from .api.extract_courses import router as extract_courses_router
+from .api.course_complete import router as courses_completed_and_not_completed
 from .api.cohere_chat import router as cohere_router
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -37,8 +37,9 @@ async def on_shutdown():
     await database.disconnect()
     
 
-# include your existing routers
+# extract_courses_router: /extract_courses
+# courses_completed_and_not_completed: /courses_completed, /course_list, /courses_not_completed
+# cohere_router: /cohere_chat
 app.include_router(extract_courses_router)
-app.include_router(courses_completed)
+app.include_router(courses_completed_and_not_completed)
 app.include_router(cohere_router)
-# app.include_router(courses__not_completed)

@@ -1,74 +1,96 @@
-import io
-import streamlit as st
-import http.client
-import json
-from openai import AzureOpenAI
-import requests
-import re
-from azure.ai.formrecognizer import DocumentAnalysisClient
-from azure.core.credentials import AzureKeyCredential
-from fastapi import APIRouter
-from pydantic import BaseModel
-from dotenv import load_dotenv
-import os
+# this file has 4 API endpoints:
+# 1. /courses_completed: POST request to set the courses completed by the user
+# 2. /courses_completed: GET request to get the courses completed by the user
+# 3. /course_list: POST request to set the course list for a major
+# 4. /course_list: GET request to get the course list for a major
+# 5. /courses_not_completed: GET request to get the courses not completed by the user and are offered in the term
 
-from pathlib import Path
-import asyncio
-from playwright.async_api import async_playwright
 import json
 import re
 import requests
-# from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, update
-from backend.db import database, courses_main,majors
+from backend.db import database, courses_main
+from pathlib import Path
+from playwright.async_api import async_playwright
 
 # Create router
 router = APIRouter()
 
-courses_completed = []
-courses_completed_str =""
-courses_not_completed = []
 
-if "course_completed" not in st.session_state:
-    st.session_state['course_completed'] = ""
-if "full_course_list" not in st.session_state:
-    st.session_state['full_course_list'] = ""
+# Simulating the session state until we have a proper session management system
+class SessionManager:
+    def __init__(self):
+        self.courses_completed = []
+        self.courses_completed_str = ""
+        self.courses_not_completed = []
+        self.courses_list_str = ""
+        self.courses_list = []
 
+    def set_courses_completed(self, courses):
+        self.courses_completed = courses
+        self.courses_completed_str = ", ".join(courses)
+    
+    def get_courses_completed(self):
+        return self.courses_completed_str
+    
+    def set_courses_not_completed(self, courses):
+        self.courses_not_completed = courses
+    
+    def get_courses_not_completed(self):
+        return self.courses_not_completed
+    
+    def set_courses_list(self, courses):
+        self.courses_list = courses
+        self.courses_list_str = ", ".join(courses)
+    
+    def get_courses_list(self):
+        return self.courses_list_str
+
+
+# Pydantic model for the request body
 class ExtractRequest(BaseModel):
     courses: list
 
+session = SessionManager()
+
+# POST request to set the courses completed by the user
 @router.post("/courses_completed")
-def courses_completed(req:ExtractRequest):
+def post_courses_completed(req:ExtractRequest):
     try:
-        courses_completed = req.courses
-        courses_completed_str = ", ".join(courses_completed)
-        st.session_state['course_completed'] = courses_completed_str
-        # print(courses_completed_str)
+        session.set_courses_completed(req.courses)
+        print("courses completed from the frontend: ",session.get_courses_completed())
+        return {"message": "Courses completed posted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# GET request to get the courses completed by the user
+@router.get("/courses_completed")
+def get_courses_completed():
+    try:
+        # print("get request ",session.get_courses_completed())
+        return session.get_courses_completed()
     except Exception as e:
         return {"error": str(e)}
 
-@router.get("/courses_completed")
-def courses_completed():
-    try:
-        # print("get request ",courses_completed_str)
-        return st.session_state['course_completed']
-    except Exception as e:
-        return {"error": str(e)}
-    
+# POST request to set the course list for a major
 @router.post("/course_list")
-def full_course_list(req:ExtractRequest):
+def post_full_course_list(req:ExtractRequest):
     try:
-        courses_list = ", ".join(req.courses)
-        st.session_state['full_course_list'] = courses_list
+        session.set_courses_list(req.courses)
+        print("course list from the frontend: ",session.get_courses_list())
+        return {"message": "Course list posted successfully"}
     except Exception as e:
-        return {"error": str(e)}
-    
+       raise HTTPException(status_code=500, detail=str(e))
+
+# GET request to get the course list for a major
 @router.get("/course_list")
-def full_course_list():
+def get_full_course_list():
     try:
-        # print("get request ",st.session_state['full_course_list'])
-        return st.session_state['full_course_list']
+        # print("get request course list: ",session.get_courses_list())
+        return session.get_courses_list()
     except Exception as e:
         return {"error": str(e)}
 
@@ -173,17 +195,14 @@ async def run(subject: str, courseNumber: str):
         return avail
     
 
-# returns the list of courses which are not completed by the user and are offered in the term
+# GET request to get the courses not completed by the user and are offered in the term
 @router.get("/courses_not_completed")
 async def course_not_comp():
     await database.connect()
-    # courses_completed_final = requests.get("http://127.0.0.1:8000/courses_completed").text
-    courses_completed_final = st.session_state['course_completed']
+    courses_completed_final = session.get_courses_completed()
     completed_courses_list =  [c.strip() for c in courses_completed_final.split(",")]
-    # print("hello course compl: ", courses_completed)
-
-    # course_list = requests.get("http://127.0.0.1:8000/course_list").text
-    course_l = st.session_state['full_course_list']
+    
+    course_l = session.get_courses_list()
     course_list_l = [c.strip() for c in course_l.split(",")]
     # print("hello course list: ", lt1)
 
@@ -204,7 +223,10 @@ async def course_not_comp():
         else:
             course_avail.append(course)
     await database.disconnect()
-    print(course_avail)
-    return course_avail
+   
+
+    session.set_courses_not_completed(course_avail)
+    print("courses not completed: ",session.get_courses_not_completed())
+    return session.get_courses_not_completed()
 
 # asyncio.run(course_not_comp())

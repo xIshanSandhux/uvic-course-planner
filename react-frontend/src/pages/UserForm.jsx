@@ -44,8 +44,10 @@ export default function UserForm() {
 
       console.log("✅ Extracted course list:", courses);
 
-      await axios.post("http://127.0.0.1:8000/course_list", { courses });
-      console.log("✅ Sent course list to backend.");
+      // await axios.post("http://127.0.0.1:8000/course_list", { courses });
+      // console.log("🚀 Course list response:", course_list_res.status);
+      // console.log("✅ Course list response:", course_list_res);
+      // console.log("✅ Sent course list to backend.");
 
       const target = form.student_status === "Yes" ? "/courses" : "/chat";
 
