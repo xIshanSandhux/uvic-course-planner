@@ -9,25 +9,33 @@ export default function Chatbot() {
   const bottomRef = useRef(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [fullCourseList, setFullCourseList] = useState([]);
-  const [courseData, setCourseData] = useState({ completed: "", courseList: "" });
+  const [courseData, setCourseData, notCompleted] = useState({ completed: "", courseList: "", notCompleted: ""});
 
   useEffect(() => {
     const fetchCourseContext = async () => {
-      const [compRes, listRes] = await Promise.all([
+      const [compRes, listRes, notCompRes] = await Promise.all([
         axios.get("http://127.0.0.1:8000/courses_completed"),
         axios.get("http://127.0.0.1:8000/course_list"),
+        axios.get("http://127.0.0.1:8000/courses_not_completed"),
+        axios.get("http://127.0.0.1:8000/pre_req_check"),
       ]);
       setCourseData({
         completed: compRes.data,
         courseList: listRes.data,
+        notCompleted: notCompRes.data,
       });
     };
     fetchCourseContext();
   }, []);
 
+  
+
+
+
   useEffect(() => {
     if (state?.selectedCourses) setSelectedCourses(state.selectedCourses);
     if (state?.fullCourseList) setFullCourseList(state.fullCourseList);
+    if (state?.notCompleted) setNotCompleted(state.notCompleted);
 
     console.log("✅ Loaded from route state:");
     console.log("✅ selectedCourses:", state.selectedCourses);
@@ -62,6 +70,7 @@ export default function Chatbot() {
   - ${yearInstructions}
   - Completed Co-op: ${state.coop_completed || 0}, Planned Co-op: ${state.coop_planned || 0}
   - Completed Courses: ${state.selectedCourses?.join(", ") || "None"}
+  - Not Completed Courses which are offered in the term: ${state.notCompleted?.join(", ") || "None"}
   - Program Course List: ${state.fullCourseList?.join(", ") || "Not provided"}
 
   📚 The student plans to take:
@@ -111,7 +120,7 @@ export default function Chatbot() {
     ];
 
     try {
-      const res = await fetch('http://localhost:8000/cohere/chat', {
+      const res = await fetch('http://localhost:8000/google/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: messagesForCohere }),

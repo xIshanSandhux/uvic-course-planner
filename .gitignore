@@ -8,5 +8,11 @@ react-frontend/.env
 venv/
 
 
+
+# Ignore all node_modules folders (including nested ones)
+react-frontend/node_modules/
+**/node_modules/
+**/node_modules/**
+
 __pycache__/
 *.py[cod]
