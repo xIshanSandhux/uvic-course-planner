@@ -31,6 +31,8 @@ export default function CourseSelect() {
         courses: selectedCourses,
       });
 
+      await delay(3000);
+
       // 2. POST full course list (based on extracted major)
       await axios.post("http://127.0.0.1:8000/course_list", {
         courses: courses,
@@ -38,7 +40,7 @@ export default function CourseSelect() {
 
       await axios.post("http://127.0.0.1:8000/courses_not_completed");
 
-      await delay(2000);
+      await delay(3000);
 
       // setIsChecking(true);
       await axios.post("http://127.0.0.1:8000/pre_req_check");
