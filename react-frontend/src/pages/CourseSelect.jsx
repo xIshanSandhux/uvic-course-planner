@@ -21,8 +21,11 @@ export default function CourseSelect() {
     );
   };
 
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
   const handleSubmit = async () => {
     try {
+      setIsChecking(true);
       // 1. POST selected (completed) courses
       await axios.post("http://127.0.0.1:8000/courses_completed", {
         courses: selectedCourses,
@@ -35,11 +38,12 @@ export default function CourseSelect() {
 
       await axios.post("http://127.0.0.1:8000/courses_not_completed");
 
-      setIsChecking(true);
-      await axios.post("http://127.0.0.1:8000/pre_req_check").then(response => {
-        setIsChecking(false); 
-        
-      });
+      await delay(2000);
+
+      // setIsChecking(true);
+      await axios.post("http://127.0.0.1:8000/pre_req_check");
+
+      setIsChecking(false);
       // console.log("preReqRes: ", preReqRes);
 
 
@@ -57,6 +61,7 @@ export default function CourseSelect() {
         }
       });
     } catch (err) {
+      setIsChecking(false);
       alert("❌ Failed to submit courses: " + err.message);
       console.error("Course submit error:", err);
     }
@@ -119,17 +124,11 @@ export default function CourseSelect() {
             >
               Back
             </button>
-            {/* <button
-              className="px-6 py-2 bg-yellow-400 text-blue-950 font-semibold rounded-full hover:bg-yellow-300 transition"
-              onClick={handleSubmit}
-            >
-              Start Planning
-            </button> */}
             <button
             className="px-6 py-2 bg-yellow-400 text-blue-950 font-semibold rounded-full hover:bg-yellow-300 transition"
             onClick={handleSubmit}
             disabled={isChecking}  
-            >
+          >
             {isChecking ? (
               <div className="flex items-center">
                 <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -147,12 +146,12 @@ export default function CourseSelect() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Checking Prerequisites...
+                Processing Information...
               </div>
             ) : (
               'Start Planning'
             )}
-            </button>
+          </button>
           </div>
 
         </section>
