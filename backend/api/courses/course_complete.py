@@ -33,6 +33,8 @@ class SessionManager:
         self.courses_not_completed = []
         self.courses_list_str = ""
         self.courses_list = []
+        self.pre_req_comp_courses = []
+        self.pre_req_comp_str = ""
 
     def set_courses_completed(self, courses):
         self.courses_completed = courses
@@ -56,6 +58,14 @@ class SessionManager:
     
     def get_courses_list(self):
         return self.courses_list_str
+
+    def set_pre_req_check(self, pre_reqs):
+        self.pre_req_comp_courses = pre_reqs
+
+    def get_pre_req_check(self):
+        self.pre_req_comp_str = ", ".join(self.pre_req_comp_courses)
+        return self.pre_req_comp_str
+
 
 # Pydantic model for the request body
 class ExtractRequest(BaseModel):
@@ -202,6 +212,39 @@ async def run(subject: str, courseNumber: str):
 
 # GET request to get the courses not completed by the user and are offered in the term
 @router.get("/courses_not_completed")
+async def course_not_comp_get():
+    # await database.connect()
+    # courses_completed_final = session.get_courses_completed()
+    # completed_courses_list =  [c.strip() for c in courses_completed_final.split(",")]
+    
+    # course_l = session.get_courses_list()
+    # course_list_l = [c.strip() for c in course_l.split(",")]
+    # # print("hello course list: ", lt1)
+
+    # course_not_comp = []
+    # for course in course_list_l:
+    #     if course not in completed_courses_list:
+    #         course_not_comp.append(course)
+    # # print(course_not_comp)
+    # course_avail =[]
+    # for course in course_not_comp:
+    #     match = re.search(r"\b[A-Z]{3,4}\d{3}\b", course)
+    #     if match:
+    #         query = select(courses_main).where(courses_main.c.course_code == match.group(0))
+    #         course_db = await database.fetch_one(query)
+    #         if course_db['Summer'] is True:
+    #             # print(course)
+    #             course_avail.append(course)
+    #     else:
+    #         course_avail.append(course)
+    # await database.disconnect()
+   
+
+    # session.set_courses_not_completed(course_avail)
+    print("courses not completed: ",session.get_courses_not_completed())
+    return session.get_courses_not_completed()
+
+@router.post("/courses_not_completed")
 async def course_not_comp():
     await database.connect()
     courses_completed_final = session.get_courses_completed()
@@ -231,8 +274,7 @@ async def course_not_comp():
    
 
     session.set_courses_not_completed(course_avail)
-    print("courses not completed: ",session.get_courses_not_completed())
-    return session.get_courses_not_completed()
+    return {"message": "Courses not completed posted successfully"}
 
 
 
@@ -249,7 +291,7 @@ async def pre_req_fetch(course: str):
     return pre_reqs
 
 # GET request to get the courses not completed by the user and are offered in the term
-@router.get("/pre_req_check")
+@router.post("/pre_req_check")
 async def pre_req_check():
    
     courses_not_completed = session.get_courses_not_completed()
@@ -296,8 +338,9 @@ async def pre_req_check():
         if avail==True:
             prereq_comp.append(course)
             # print(f"{course} can be dne by user")
-    # print("prereq_comp: ",prereq_comp)
+    print("prereq_comp: ",prereq_comp)
     # print("prereq_not_comp: ",prereq_not_comp)
-
-    return prereq_comp
+    session.set_pre_req_check(prereq_comp)
+    print("prereq_comp: ",session.get_pre_req_check())
+    return {"message": "Pre-req check posted successfully"}
         

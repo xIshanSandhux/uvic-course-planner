@@ -8,7 +8,7 @@ export default function CourseSelect() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [search, setSearch] = useState("");
   const courses = state?.courses || [];
-
+  const [isChecking, setIsChecking] = useState(false);
   const filteredCourses = search
     ? courses.filter(course => course.toLowerCase().includes(search.toLowerCase()))
     : courses;
@@ -33,6 +33,16 @@ export default function CourseSelect() {
         courses: courses,
       });
 
+      await axios.post("http://127.0.0.1:8000/courses_not_completed");
+
+      setIsChecking(true);
+      await axios.post("http://127.0.0.1:8000/pre_req_check").then(response => {
+        setIsChecking(false); 
+        
+      });
+      // console.log("preReqRes: ", preReqRes);
+
+
       // 3. Navigate to chatbot with all relevant state
       console.log("Navigating to /chat with state:", {
         ...state,
@@ -42,8 +52,8 @@ export default function CourseSelect() {
       navigate("/chat", {
         state: {
           ...state, // name, major, minor, etc. from UserForm
-          selectedCourses, // specifically completed ones
-          fullCourseList: courses, // can optionally use in Chatbot.jsx prompt too
+          // selectedCourses, // specifically completed ones
+          // fullCourseList: courses, // can optionally use in Chatbot.jsx prompt too
         }
       });
     } catch (err) {
@@ -109,13 +119,42 @@ export default function CourseSelect() {
             >
               Back
             </button>
-            <button
+            {/* <button
               className="px-6 py-2 bg-yellow-400 text-blue-950 font-semibold rounded-full hover:bg-yellow-300 transition"
               onClick={handleSubmit}
             >
               Start Planning
+            </button> */}
+            <button
+            className="px-6 py-2 bg-yellow-400 text-blue-950 font-semibold rounded-full hover:bg-yellow-300 transition"
+            onClick={handleSubmit}
+            disabled={isChecking}  
+            >
+            {isChecking ? (
+              <div className="flex items-center">
+                <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                  <circle 
+                    className="opacity-25" 
+                    cx="12" 
+                    cy="12" 
+                    r="10" 
+                    stroke="currentColor" 
+                    strokeWidth="4"
+                  />
+                  <path 
+                    className="opacity-75" 
+                    fill="currentColor" 
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Checking Prerequisites...
+              </div>
+            ) : (
+              'Start Planning'
+            )}
             </button>
           </div>
+
         </section>
       </main>
     </div>

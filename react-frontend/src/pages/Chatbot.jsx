@@ -9,7 +9,12 @@ export default function Chatbot() {
   const bottomRef = useRef(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [fullCourseList, setFullCourseList] = useState([]);
-  const [courseData, setCourseData, notCompleted] = useState({ completed: "", courseList: "", notCompleted: ""});
+  const [notCompleted, setNotCompleted] = useState([]);
+  const [courseData, setCourseData] = useState({
+    completed: "",      // ← array, so .join() is safe
+    courseList: "",
+    notComp: []
+  });
 
   useEffect(() => {
     const fetchCourseContext = async () => {
@@ -17,30 +22,40 @@ export default function Chatbot() {
         axios.get("http://127.0.0.1:8000/courses_completed"),
         axios.get("http://127.0.0.1:8000/course_list"),
         axios.get("http://127.0.0.1:8000/courses_not_completed"),
-        axios.get("http://127.0.0.1:8000/pre_req_check"),
       ]);
-      setCourseData({
-        completed: compRes.data,
-        courseList: listRes.data,
-        notCompleted: notCompRes.data,
-      });
+      setSelectedCourses(compRes.data);
+      setFullCourseList(listRes.data);
+      setNotCompleted(notCompRes.data);
     };
     fetchCourseContext();
   }, []);
+
+  useEffect(() => {
+    const fetchCourseContext = async () => {
+      setCourseData({
+        completed: selectedCourses,
+        courseList: fullCourseList,
+        notComp: notCompleted,
+      });
+    };
+    fetchCourseContext();
+  }, [selectedCourses, fullCourseList, notCompleted]);
+
+  console.log("courseData: ", courseData);
 
   
 
 
 
-  useEffect(() => {
-    if (state?.selectedCourses) setSelectedCourses(state.selectedCourses);
-    if (state?.fullCourseList) setFullCourseList(state.fullCourseList);
-    if (state?.notCompleted) setNotCompleted(state.notCompleted);
+  // useEffect(() => {
+  //   if (state?.selectedCourses) setSelectedCourses(state.selectedCourses);
+  //   if (state?.fullCourseList) setFullCourseList(state.fullCourseList);
+  //   if (state?.notCompleted) setNotCompleted(state.notCompleted);
 
-    console.log("✅ Loaded from route state:");
-    console.log("✅ selectedCourses:", state.selectedCourses);
-    console.log("✅ fullCourseList:", state.fullCourseList);
-  }, [state]);
+  //   console.log("✅ Loaded from route state:");
+  //   console.log("✅ selectedCourses:", state.selectedCourses);
+  //   console.log("✅ fullCourseList:", state.fullCourseList);
+  // }, [state]);
 
   let yearInstructions = "There are no extra instructions.";
   if (state.year === "First Year") {
@@ -69,9 +84,9 @@ export default function Chatbot() {
   - Year Level: ${state.year || "unspecified"}
   - ${yearInstructions}
   - Completed Co-op: ${state.coop_completed || 0}, Planned Co-op: ${state.coop_planned || 0}
-  - Completed Courses: ${state.selectedCourses?.join(", ") || "None"}
-  - Not Completed Courses which are offered in the term: ${state.notCompleted?.join(", ") || "None"}
-  - Program Course List: ${state.fullCourseList?.join(", ") || "Not provided"}
+  - Completed Courses: ${courseData.completed || "None"}
+  - Courses which are not completed by ${state.name} and offered in the current term: ${courseData.notComp?.join(", ") || "None"}
+  - Program Course List: ${courseData.courseList || "Not provided"}
 
   📚 The student plans to take:
   - ${state.core_courses} core course(s)
@@ -85,7 +100,7 @@ export default function Chatbot() {
   - Make sure prerequisites are met
   - Adjust difficulty based on year level (e.g., don’t suggest 400-level courses to first-years)
 
-  ✍️ Response Format (strictly follow this):
+  ✍️ Response Format for returning the courses:
   1. [Course Code] - [Course Title] (Core or Elective)
 
   Example:
