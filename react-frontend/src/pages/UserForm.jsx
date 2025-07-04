@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const majors = [
-  "Select a Major", "Software Engineering", "Computer Science", "Electrical Engineering",
-  "Computer Engineering", "Biomedical Engineering", "Mechanical Engineering", "Civil Engineering"
+  "Select a Major", "Software Engineering"
 ];
 
 const years = ["Please Select an Option", "Year 1", "Year 2", "Year 3", "Year 4"];
@@ -14,16 +13,12 @@ export default function UserForm() {
   const [form, setForm] = useState({
     name: "",
     major: "Select a Major",
-    minor: "",
-    specialization: "",
-    core_courses: 0,
     elective_courses: 0,
+    core_courses: 0,
     degree_type: "Please Select an Option",
     student_status: "Please Select an Option",
     year: "Please Select an Option",
-    supports_coop: "Please Select an Option",
     coop_completed: 0,
-    coop_planned: 0,
   });
 
   const total_courses = form.core_courses + form.elective_courses;
@@ -34,7 +29,7 @@ export default function UserForm() {
 
   const handleNext = async () => {
     if (form.major === "Select a Major") return alert("Please select a major");
-    if (total_courses > 8) return alert("Total number of courses cannot exceed 8");
+    if (total_courses > 6) return alert("Total number of courses cannot exceed 6");
 
     console.log("📤 Submitting form data:", form); // log the form state
 
@@ -42,9 +37,7 @@ export default function UserForm() {
       const res = await axios.post("http://127.0.0.1:8000/extract_courses", { major: form.major });
       const courses = res.data;
 
-      console.log("✅ Extracted course list:", courses);
-
-      // await axios.post("http://127.0.0.1:8000/course_list", { courses });
+      // console.log("✅ Extracted course list:", courses);
       // console.log("🚀 Course list response:", course_list_res.status);
       // console.log("✅ Course list response:", course_list_res);
       // console.log("✅ Sent course list to backend.");
@@ -55,7 +48,7 @@ export default function UserForm() {
         ...form,
         courses
       };
-      console.log("🚀 Navigating to", target, "with state:", nextState);
+      console.log(" Navigating to", target, "with state:", nextState);
 
       navigate(target, { state: nextState });
 
@@ -90,24 +83,24 @@ export default function UserForm() {
               </select>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-1">Enter your minor</label>
               <input className="w-full rounded p-2 bg-white bg-opacity-80 text-black"
                 value={form.minor}
                 onChange={e => handleChange('minor', e.target.value)}
               />
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <label className="block mb-1">Specialization (optional)</label>
               <input className="w-full rounded p-2 bg-white bg-opacity-80 text-black"
                 value={form.specialization}
                 onChange={e => handleChange('specialization', e.target.value)}
               />
-            </div>
+            </div> */}
 
             <div>
-              <label className="block mb-1">How many core courses do you want to take?</label>
+              <label className="block mb-1">How many courses do you want to take?</label>
               <input type="number" min="0" max="8" className="w-full rounded p-2 bg-white bg-opacity-80 text-black"
                 value={form.core_courses}
                 onChange={e => handleChange('core_courses', +e.target.value)}
@@ -152,7 +145,7 @@ export default function UserForm() {
               </select>
             </div>
 
-            {(form.year === "Year 2" || form.year === "Year 3" || form.year === "Year 4") && (
+            {/* {(form.year === "Year 2" || form.year === "Year 3" || form.year === "Year 4") && (
               <>
                 <div>
                   <label className="block mb-1">Does your program support co-op?</label>
@@ -185,7 +178,7 @@ export default function UserForm() {
                   </>
                 )}
               </>
-            )}
+            )} */}
           </div>
 
           <button
