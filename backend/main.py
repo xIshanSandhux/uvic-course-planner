@@ -13,7 +13,7 @@ app = FastAPI()
 # Load .env variables
 load_dotenv()
 
-print("✅ COHERE_API_KEY =", os.getenv("COHERE_API_KEY"))
+# print("COHERE_API_KEY =", os.getenv("COHERE_API_KEY"))
 
 app.add_middleware(
     CORSMiddleware,
