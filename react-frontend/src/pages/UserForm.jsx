@@ -31,7 +31,7 @@ export default function UserForm() {
     if (form.major === "Select a Major") return alert("Please select a major");
     if (total_courses > 6) return alert("Total number of courses cannot exceed 6");
 
-    console.log("📤 Submitting form data:", form); // log the form state
+    // console.log("📤 Submitting form data:", form); // log the form state
 
     try {
       const res = await axios.post("http://127.0.0.1:8000/extract_courses", { major: form.major });
@@ -48,7 +48,7 @@ export default function UserForm() {
         ...form,
         courses
       };
-      console.log(" Navigating to", target, "with state:", nextState);
+      // console.log(" Navigating to", target, "with state:", nextState);
 
       navigate(target, { state: nextState });
 

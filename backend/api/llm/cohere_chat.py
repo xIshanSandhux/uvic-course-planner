@@ -11,7 +11,7 @@ class ChatRequest(BaseModel):
 
 @router.post("/cohere/chat")
 async def cohere_chat(req: ChatRequest):
-    print("chat message: ",req.messages)
+    # print("chat message: ",req.messages)
     cohere_api_key = os.getenv("COHERE_API_KEY")
     if not cohere_api_key:
         raise HTTPException(status_code=500, detail=" COHERE_API_KEY not found in environment variables")
@@ -22,9 +22,9 @@ async def cohere_chat(req: ChatRequest):
         # Split out user message and prior chat history
         all_msgs = req.messages
         user_msg = all_msgs[-1]["content"]
-        print("user_msg: ",user_msg)
+        # print("user_msg: ",user_msg)
         system_msg = all_msgs[0]["content"]
-        print("system_msg: ",system_msg)
+        # print("system_msg: ",system_msg)
 
         chat_history = [
             {

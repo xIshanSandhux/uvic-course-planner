@@ -46,7 +46,7 @@ export default function Chatbot() {
     fetchCourseContext();
   }, [selectedCourses, fullCourseList, notCompleted]);
 
-  console.log("courseData: ", courseData);
+  // console.log("courseData: ", courseData);
 
   
 
