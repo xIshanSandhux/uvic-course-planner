@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Backend FastAPI service
+  backend:
+    build:
+      context: .                    # Build from root directory
+      dockerfile: backend/Dockerfile  # Use Dockerfile in backend folder
+    ports:
+      - "8000:8000"                # Map host port 8000 to container port 8000
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=${DATABASE_URL}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    env_file:
+      - .env                       # Load environment variables from .env file
+    volumes:
+      - ./backend:/app/backend     # Optional: Mount for development hot reload
+    restart: unless-stopped
+
+  # Frontend React service
+  frontend:
+    build:
+      context: ./react-frontend    # Build from react-frontend directory
+      dockerfile: Dockerfile       # Use Dockerfile in react-frontend folder
+    ports:
+      - "5173:5173"               # Map host port 5173 to container port 5173
+    volumes:
+      - ./react-frontend/src:/app/src           # Mount src for hot reload
+      - ./react-frontend/public:/app/public     # Mount public for hot reload
+      - /app/node_modules          # Prevent overwriting node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    depends_on:
+      - backend                    # Start backend before frontend 
