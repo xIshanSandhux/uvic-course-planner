@@ -85,11 +85,6 @@ backend/
 #### `/extract_courses` (POST)
 - **Purpose**: Extract and store course data for a specific major
 - **Request Body**: `{"major": "string"}`
-- **Functionality**: 
-  - Fetches program requirements from UVic Kuali API
-  - Parses HTML course requirements
-  - Stores major and course data in database
-  - Runs in background to avoid timeout
 
 #### `/courses_completed` (POST)
 - **Purpose**: Set courses completed by the user
