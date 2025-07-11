@@ -27,7 +27,7 @@ async def db_courses():
 
 # calls the both the helper functions to check if the course is offered in the term or not 
 async def courses_offered_in_term():
-    await database.connect()
+    # await database.connect()
     all_courses = await db_courses()
     course_avail = []
 
@@ -46,7 +46,7 @@ async def courses_offered_in_term():
                 .values(Summer=avail)
                 )
             await database.execute(query)
-    await database.disconnect()
+    # await database.disconnect()
    
 
 # Helper Function which runs the playwright script for each course

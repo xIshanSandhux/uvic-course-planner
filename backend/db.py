@@ -6,8 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+
 database = Database(DATABASE_URL)
 metadata = MetaData()
+
 
 # Single table for course data including a prerequisites list
 courses = Table(
@@ -47,8 +51,10 @@ majors = Table(
 )
 
 def init_db():
+    
     engine = sqlalchemy.create_engine(DATABASE_URL)
     metadata.create_all(engine)
+    
 
 if __name__ == "__main__":
     init_db()
