@@ -79,7 +79,7 @@ def parse_program_requirements(pid: str):
 async def store_major_data(major: str):
 
     # Initating connection
-    await database.connect()
+    # await database.connect()
 
     # Get Major PID
     pid = get_program_pid(major)
@@ -106,7 +106,7 @@ async def store_major_data(major: str):
     )
 
     # Ending Connection
-    await database.disconnect()
+    # await database.disconnect()
 
 
 # Gets the pid for the program the user has selected in the form
@@ -126,7 +126,7 @@ def get_course_pid(course: str):
 # stores the course data in db (pid, course_code, course_name, prerequisites, credits,course_description)
 async def store_course_data(major: str):
 
-    await database.connect()
+    # await database.connect()
     query = select(majors.c.courses).where(majors.c.major == major)
     course_list = await database.fetch_one(query)
     # print(course_list['courses'])
@@ -194,7 +194,7 @@ async def store_course_data(major: str):
                 },
             )
 
-    await database.disconnect()
+    # await database.disconnect()
 
 
 # API which is used to get the course list
