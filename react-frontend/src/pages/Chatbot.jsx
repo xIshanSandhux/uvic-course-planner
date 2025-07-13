@@ -1,21 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import jsPDF from 'jspdf';
 
 export default function Chatbot() {
   const { state } = useLocation();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
-  const [selectedCourses, setSelectedCourses] = useState([]);
-  const [fullCourseList, setFullCourseList] = useState([]);
-  const [courseData, setCourseData] = useState({ completed: "", courseList: "" });
+  const [courseData, setCourseData] = useState({ completed: '', courseList: '' });
 
   useEffect(() => {
     const fetchCourseContext = async () => {
       const [compRes, listRes] = await Promise.all([
-        axios.get("http://127.0.0.1:8000/courses_completed"),
-        axios.get("http://127.0.0.1:8000/course_list"),
+        axios.get('http://127.0.0.1:8000/courses_completed'),
+        axios.get('http://127.0.0.1:8000/course_list'),
       ]);
       setCourseData({
         completed: compRes.data,
@@ -26,73 +27,28 @@ export default function Chatbot() {
   }, []);
 
   useEffect(() => {
-    if (state?.selectedCourses) setSelectedCourses(state.selectedCourses);
-    if (state?.fullCourseList) setFullCourseList(state.fullCourseList);
+    if (messages.length === 0) {
+      setMessages([
+        {
+          role: 'assistant',
+          content: `Hi ${state.name}, I’ll help you with your UVic course planning. Ask me anything about course selection!`,
+        },
+      ]);
+    }
+  }, []);
 
-    console.log("✅ Loaded from route state:");
-    console.log("✅ selectedCourses:", state.selectedCourses);
-    console.log("✅ fullCourseList:", state.fullCourseList);
-  }, [state]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
-  let yearInstructions = "There are no extra instructions.";
-  if (state.year === "First Year") {
-    yearInstructions = "Focus on suggesting introductory-level courses and electives with few prerequisites.";
-  } else if (state.year === "Second Year") {
-    yearInstructions = "Suggest a mix of core required courses and electives assuming first-year prerequisites are completed.";
-  } else if (state.year === "Third Year") {
-    yearInstructions = "Suggest upper-level electives and core courses, and help them explore specialization paths.";
-  } else if (state.year === "Fourth Year") {
-    yearInstructions = "Focus on capstone projects, final graduation requirements, and any outstanding electives.";
-  }
+  const yearInstructions = {
+    'First Year': 'Focus on suggesting introductory-level courses and electives with few prerequisites.',
+    'Second Year': 'Suggest a mix of core required courses and electives assuming first-year prerequisites are completed.',
+    'Third Year': 'Suggest upper-level electives and core courses, and help them explore specialization paths.',
+    'Fourth Year': 'Focus on capstone projects, final graduation requirements, and any outstanding electives.',
+  }[state.year] || 'There are no extra instructions.';
 
-  const systemPrompt = `
-  You are a kind and helpful UVic course planning assistant expert.
-
-  🎓 This assistant is strictly for current or prospective **UVic students**.
-  Only suggest **official UVic courses** that are part of UVic’s curriculum.
-
-  Here is the student's information:
-  - Name: ${state.name}
-  - Major: ${state.major || "an unspecified major"}
-  - Minor: ${state.minor || "None"}
-  - Specialization: ${state.specialization || "None"}
-  - Academic Interests: ${state.interests || "general academic fields"}
-  - Degree Type: ${state.degree_type}
-  - Year Level: ${state.year || "unspecified"}
-  - ${yearInstructions}
-  - Completed Co-op: ${state.coop_completed || 0}, Planned Co-op: ${state.coop_planned || 0}
-  - Completed Courses: ${state.selectedCourses?.join(", ") || "None"}
-  - Program Course List: ${state.fullCourseList?.join(", ") || "Not provided"}
-
-  📚 The student plans to take:
-  - ${state.core_courses} core course(s)
-  - ${state.elective_courses} elective course(s)
-
-  👉 Your task:
-  - Recommend a total of ${state.core_courses + state.elective_courses} **UVic courses**
-  - Choose core courses from the student’s major and program course list
-  - Choose electives from outside the core list that align with their interests or provide breadth
-  - Avoid recommending already completed courses
-  - Make sure prerequisites are met
-  - Adjust difficulty based on year level (e.g., don’t suggest 400-level courses to first-years)
-
-  ✍️ Response Format (strictly follow this):
-  1. [Course Code] - [Course Title] (Core or Elective)
-
-  Example:
-  1. CSC 225 - Algorithms and Data Structures I (Core)
-  2. CSC 226 - Algorithms and Data Structures II (Core)
-  3. PHIL 161 - Introduction to Logic (Elective)
-
-  💡 Use a friendly and clear tone. Keep the recommendations concise.
-  Do **not** suggest non-UVic courses. Do **not** make up course codes.
-  If you're unsure, politely ask the student for clarification before continuing.
-  `;
-
-  // console.log("Debug Info:");
-  // console.log("state.core_courses:", state?.core_courses);
-  // console.log("state.selectedCourses:", state.selectedCourses);
-  // console.log("state.fullCourseList:", state.fullCourseList);
+  const systemPrompt = `You are a kind and helpful UVic course planning assistant expert.`;
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -101,13 +57,11 @@ export default function Chatbot() {
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput('');
+    setLoading(true);
 
     const messagesForCohere = [
       { role: 'system', content: systemPrompt },
-      ...updatedMessages.map(m => ({
-        role: m.role,
-        content: m.content
-      }))
+      ...updatedMessages.map((m) => ({ role: m.role, content: m.content })),
     ];
 
     try {
@@ -118,77 +72,140 @@ export default function Chatbot() {
       });
 
       const data = await res.json();
-      const contentArr = data?.content;
+      const replyText = data?.content?.[0]?.text?.trim() || "Sorry, I didn’t understand that.";
 
-      let replyText = '';
-      if (Array.isArray(contentArr) && contentArr.length > 0) {
-        replyText = contentArr[0].text?.trim() || '';
-      } else {
-        console.error('⚠️ Unexpected format for contentArr:', contentArr);
-        replyText = "Sorry, I didn't understand that.";
-      }
-
-      setMessages([
-        ...updatedMessages,
-        { role: 'assistant', content: replyText }
-      ]);
+      setMessages([...updatedMessages, { role: 'assistant', content: replyText }]);
     } catch (e) {
       console.error('Cohere backend error:', e);
       alert('❌ Error talking to backend: ' + e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text('UVic Course Plan Recommendations', 10, 10);
+    let y = 20;
+    messages.forEach((msg) => {
+      if (msg.role === 'assistant') {
+        const lines = doc.splitTextToSize(`Assistant: ${msg.content}`, 180);
+        doc.text(lines, 10, y);
+        y += lines.length * 10;
+      }
+    });
+    doc.save('uvic_course_plan.pdf');
+  };
 
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          role: 'assistant',
-          content: `Hi ${state.name}, I’ll help you with your UVic course planning. Ask me anything about course selection!`
-        }
-      ]);
+  const savePlan = async () => {
+    try {
+      await axios.post('http://localhost:8000/save_plan', {
+        user: state.name,
+        messages,
+      });
+      alert('✅ Plan saved successfully!');
+    } catch (e) {
+      console.error(e);
+      alert('❌ Failed to save plan.');
     }
-  }, []);
+  };
+
+  const suggestions = [
+    'Suggest core courses only',
+    'Suggest easy electives',
+    'What if I want to switch majors?',
+    'Give a sample 4-month schedule',
+  ];
 
   return (
-    <div className="flex min-h-screen w-screen bg-gradient-to-b from-blue-600 to-blue-900 text-white justify-center items-center px-4 py-6">
-      <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 w-full max-w-3xl shadow-lg flex flex-col h-full max-h-[90vh]">
-        <h2 className="text-3xl font-bold mb-4 text-center">UVic Course Planning Assistant 💬</h2>
+    <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple">
+      <main className="flex-grow flex justify-center items-start px-6 py-6 pt-10 overflow-y-auto">
+        <section className="bg-white rounded-2xl p-6 w-full max-w-3xl shadow-soft mb-10 flex flex-col h-[85vh]">
+          <h2 className="text-3xl font-bold text-center mb-6">UVic Course Planning Assistant 💬</h2>
 
-        <div className="flex-1 overflow-y-auto space-y-4 p-2">
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] p-3 rounded-lg text-sm break-words whitespace-pre-wrap ${
-                msg.role === 'user'
-                  ? 'bg-white bg-opacity-20 text-white rounded-br-none'
-                  : 'bg-white bg-opacity-10 text-white rounded-bl-none'
-              }`}>
-                {msg.content}
+          <div className="flex-1 overflow-y-auto space-y-4 px-2">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[75%] p-3 rounded-lg text-sm whitespace-pre-wrap break-words ${
+                  msg.role === 'user'
+                    ? 'bg-accent text-white rounded-br-none'
+                    : 'bg-purple/10 text-black rounded-bl-none'
+                }`}>
+                  {msg.content}
+                </div>
               </div>
-            </div>
-          ))}
-          <div ref={bottomRef} />
-        </div>
+            ))}
+            {loading && (
+              <div className="text-sm text-gray-500 italic">Assistant is typing...</div>
+            )}
+            <div ref={bottomRef} />
+          </div>
 
-        <div className="flex gap-2 mt-4">
-          <input
-            className="flex-1 p-2 rounded bg-white bg-opacity-80 text-black"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask something..."
-          />
-          <button
-            className="px-6 py-2 bg-yellow-400 text-blue-950 font-semibold rounded-full hover:bg-yellow-300 transition"
-            onClick={sendMessage}
-          >
-            Send
-          </button>
-        </div>
-      </div>
+          <div className="mt-4 flex gap-2">
+            <input
+              className="flex-1 p-2 rounded border bg-white text-black"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Ask something..."
+            />
+            <button
+              className="px-6 py-2 bg-accent text-white font-semibold rounded-full hover:text-black hover:bg-cyan transition shadow-soft"
+              onClick={sendMessage}
+            >
+              Send
+            </button>
+          </div>
+
+          {/* Suggestions Panel */}
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold mb-2">Suggestions:</h3>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((text, i) => (
+                <button
+                  key={i}
+                  onClick={() => setInput(text)}
+                  className="px-3 py-1 text-xs rounded-full border border-purple text-purple hover:bg-purple/10 bg-white"
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Save + Export + Back Buttons */}
+          <div className="flex justify-between items-center flex-wrap gap-4 mt-6">
+            {/* Back Button */}
+            <button
+              className="px-6 py-3 bg-gray-200 text-black font-semibold rounded-full hover:bg-gray-300 transition"
+              onClick={() => navigate(-1)}
+            >
+              Back
+            </button>
+
+            {/* Export + Save Buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={exportPDF}
+                className="px-4 py-2 bg-white text-purple text-sm rounded-full border border-purple hover:bg-purple/10"
+              >
+                📄 Export as PDF
+              </button>
+              <button
+                onClick={savePlan}
+                className="px-4 py-2 bg-white text-purple text-sm rounded-full border border-purple hover:bg-purple/10"
+              >
+                💾 Save this Plan
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="bg-primary text-purple/60 py-4 text-center text-sm w-full">
+        © {new Date().getFullYear()} UVic Course Planner
+      </footer>
     </div>
   );
 }

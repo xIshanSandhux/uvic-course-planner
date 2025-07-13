@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function HamburgerIcon() {
   return (
-    <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-8 w-8 text-accent hover:text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
     </svg>
   );
@@ -11,7 +11,7 @@ function HamburgerIcon() {
 
 function CloseIcon() {
   return (
-    <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-6 w-6 text-accent hover:text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
@@ -22,16 +22,16 @@ export default function LandingPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen w-screen bg-gradient-to-b from-blue-600 to-blue-900 text-white">
+    <div className="flex min-h-screen w-screen bg-offwhite text-purple font-sans">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-blue-950 text-white transform ${
+        className={`fixed inset-y-0 left-0 w-64 bg-offwhite text-dark transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-300 ease-in-out shadow-lg z-30`}
+        } transition-transform duration-300 ease-in-out shadow-soft z-30`}
         role="navigation"
       >
-        <div className="flex items-center justify-between px-4 py-4 border-b border-blue-800">
-          <h2 className="text-xl font-bold">Menu</h2>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-yellow-300">
+          <h2 className="text-xl font-bold text-dark">Menu</h2>  {/* 👈 Changed to dark */}
           <button onClick={() => setSidebarOpen(false)} aria-label="Close Menu">
             <CloseIcon />
           </button>
@@ -47,7 +47,7 @@ export default function LandingPage() {
               <li key={path}>
                 <Link
                   to={path}
-                  className="block px-4 py-3 hover:bg-blue-800 transition rounded"
+                  className="block px-4 py-3 text-dark hover:bg-accent hover:text-white transition rounded"
                   onClick={() => setSidebarOpen(false)}
                 >
                   {label}
@@ -57,6 +57,7 @@ export default function LandingPage() {
           </ul>
         </nav>
       </aside>
+
 
       {/* Overlay */}
       {sidebarOpen && (
@@ -78,22 +79,22 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <main className="flex-grow flex flex-col justify-center items-center px-6 text-center">
-          <section className="backdrop-blur-lg bg-white bg-opacity-10 rounded-2xl p-10 max-w-2xl shadow-lg">
-            <h1 className="text-5xl font-extrabold text-white mb-4">
+          <section className="bg-white rounded-2xl p-10 max-w-2xl shadow-soft">
+            <h1 className="text-4xl pb-4 font-extrabold mb-4 text-purple">
               Plan Your UVic Courses with Ease
             </h1>
-            <p className="text-lg text-gray-200 mb-6">
+            <p className="text-lg text-black font-medium mb-6">
               An AI-powered assistant that helps you:
             </p>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left text-yellow-300 list-disc list-inside mb-8">
-              <li>Pick your courses smartly</li>
+            <ul className="grid grid-cols-1 sm:grid-cols-1 gap-4 text-center text-purple/70 font-small list-disc list-inside mb-8">
+              <li>Enter your academic info</li>
+              <li>Get tailored course suggestions</li>
               <li>Avoid scheduling conflicts</li>
-              <li>Get tailored suggestions</li>
               <li>Export timetables effortlessly</li>
             </ul>
             <button
               onClick={() => navigate('/form')}
-              className="px-8 py-3 bg-yellow-400 text-blue-950 font-semibold rounded-full hover:bg-yellow-300 transition"
+              className="px-8 py-3 bg-accent shadow-soft text-white font-semibold rounded-full hover:text-black hover:bg-cyan transition"
             >
               Start Planning
             </button>
@@ -101,11 +102,10 @@ export default function LandingPage() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-blue-950 text-gray-300 py-4 text-center text-sm">
+        <footer className="bg-primary text-purple/60 py-4 text-center text-sm">
           © {new Date().getFullYear()} UVic Course Planner
         </footer>
       </div>
     </div>
-    
   );
 }
