@@ -115,9 +115,9 @@ export default function Chatbot() {
   };
 
   const suggestions = [
-    'Suggest core courses only',
-    'Suggest easy electives',
-    'What if I want to switch majors?',
+    'Suggest requested core courses and elective courses',
+    'What are the upcoming core courses to be done?',
+    'Suggest easy electives.',
     'Give a sample 4-month schedule',
   ];
 
