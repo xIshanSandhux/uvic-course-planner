@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function Chatbot() {
+  useScrollToTop();
+
   const { state } = useLocation();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -120,8 +123,8 @@ export default function Chatbot() {
 
   return (
     <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple">
-      <main className="flex-grow flex justify-center items-start px-6 py-6 pt-10 overflow-y-auto">
-        <section className="bg-white rounded-2xl p-6 w-full max-w-3xl shadow-soft mb-10 flex flex-col h-[85vh]">
+      <main className="flex-grow flex justify-center items-start px-6 py-6">
+        <section className="bg-white rounded-2xl p-6 w-full max-w-3xl shadow-soft mb-10 pt-10 flex flex-col h-[85vh]">
           <h2 className="text-3xl font-bold text-center mb-6">UVic Course Planning Assistant 💬</h2>
 
           <div className="flex-1 overflow-y-auto space-y-4 px-2">
@@ -158,7 +161,6 @@ export default function Chatbot() {
             </button>
           </div>
 
-          {/* Suggestions Panel */}
           <div className="mt-4">
             <h3 className="text-sm font-semibold mb-2">Suggestions:</h3>
             <div className="flex flex-wrap gap-2">
@@ -174,9 +176,7 @@ export default function Chatbot() {
             </div>
           </div>
 
-          {/* Save + Export + Back Buttons */}
           <div className="flex justify-between items-center flex-wrap gap-4 mt-6">
-            {/* Back Button */}
             <button
               className="px-6 py-3 bg-gray-200 text-black font-semibold rounded-full hover:bg-gray-300 transition"
               onClick={() => navigate(-1)}
@@ -184,7 +184,6 @@ export default function Chatbot() {
               Back
             </button>
 
-            {/* Export + Save Buttons */}
             <div className="flex gap-4">
               <button
                 onClick={exportPDF}

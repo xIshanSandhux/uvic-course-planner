@@ -2,8 +2,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function FS3PrereqsCompleted() {
+  useScrollToTop();
+
   const { state } = useLocation();
   const navigate = useNavigate();
   const [selectedCourses, setSelectedCourses] = useState([]);
@@ -51,10 +54,6 @@ export default function FS3PrereqsCompleted() {
       <main className="flex-grow flex justify-center items-start px-6 py-10 overflow-y-auto">
         <section className="bg-white rounded-2xl p-10 w-full max-w-3xl shadow-soft mb-10">
           <ProgressTracker currentStep={3} />
-
-          <h2 className="text-4xl font-bold mb-6 text-center text-purple">
-            Select Completed Courses
-          </h2>
 
           {/* Search Field */}
           <div className="mb-6">
