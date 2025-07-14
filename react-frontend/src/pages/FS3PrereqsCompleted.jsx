@@ -3,6 +3,8 @@ import { useState } from 'react';
 import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
 import useScrollToTop from '../hooks/useScrollToTop';
+import SidebarLayout from '../components/SidebarLayout';
+import Footer from '../components/Footer';
 
 export default function FS3PrereqsCompleted() {
   useScrollToTop();
@@ -50,9 +52,9 @@ export default function FS3PrereqsCompleted() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple">
-      <main className="flex-grow flex justify-center items-start px-6 py-10 overflow-y-auto">
-        <section className="bg-white rounded-2xl p-10 w-full max-w-3xl shadow-soft mb-10">
+    <SidebarLayout>
+      <main className="flex-grow flex justify-center items-start px-6 pt-14 overflow-y-auto">
+        <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10">
           <ProgressTracker currentStep={3} />
 
           {/* Search Field */}
@@ -116,10 +118,6 @@ export default function FS3PrereqsCompleted() {
           </div>
         </section>
       </main>
-
-      <footer className="bg-primary text-purple/60 py-4 text-center text-sm w-full">
-        © {new Date().getFullYear()} UVic Course Planner
-      </footer>
-    </div>
+    </SidebarLayout>
   );
 }

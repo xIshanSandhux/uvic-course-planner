@@ -4,6 +4,7 @@ import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
 import CoursePlan from '../components/FS2-Course-Plan';
 import useScrollToTop from '../hooks/useScrollToTop';
+import SidebarLayout from '../components/SidebarLayout';
 
 const renderOption = (value) => (
   <option
@@ -31,46 +32,45 @@ export default function FS2CoursePlan() {
 
   const handleNext = async () => {
     if (form.major === "Select a Major")
-        return alert("Please select a major");
+      return alert("Please select a major");
     if (form.has_credits === "Please Select an Option")
-        return alert("Please select if you have completed credits at UVic or have transfer credits");
+      return alert("Please select if you have completed credits at UVic or have transfer credits");
     if (total_courses > 8)
-        return alert("Total number of courses cannot exceed 8");
+      return alert("Total number of courses cannot exceed 8");
 
     try {
-        const res = await axios.post("http://127.0.0.1:8000/extract_courses", {
+      const res = await axios.post("http://127.0.0.1:8000/extract_courses", {
         major: form.major,
-        });
-        const courses = res.data;
+      });
+      const courses = res.data;
 
-        await axios.post("http://127.0.0.1:8000/course_list", { courses });
+      await axios.post("http://127.0.0.1:8000/course_list", { courses });
 
-        // Conditionally route based on has_credits
-        if (form.has_credits === "Yes") {
+      // Conditionally route based on has_credits
+      if (form.has_credits === "Yes") {
         navigate("/courses", {
-            state: {
+          state: {
             ...form,
             courses,
-            },
+          },
         });
-        } else {
+      } else {
         navigate("/chat", {
-            state: {
+          state: {
             ...form,
             selectedCourses: [],
             fullCourseList: courses,
-            },
+          },
         });
-        }
+      }
     } catch (err) {
-        alert("Something went wrong: " + err.message);
-        console.error("❌ Submission error:", err);
+      alert("Something went wrong: " + err.message);
+      console.error("❌ Submission error:", err);
     }
-    };
-
+  };
 
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple">
+    <SidebarLayout>
       <main className="flex-grow flex justify-center items-start px-6 py-6 pt-14">
         <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10">
           <ProgressTracker currentStep={2} />
@@ -100,10 +100,6 @@ export default function FS2CoursePlan() {
           </div>
         </section>
       </main>
-
-      <footer className="bg-primary text-purple/60 py-4 text-center text-sm w-full">
-        © {new Date().getFullYear()} UVic Course Planner
-      </footer>
-    </div>
+    </SidebarLayout>
   );
 }

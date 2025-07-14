@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import useScrollToTop from '../hooks/useScrollToTop';
+import SidebarLayout from '../components/SidebarLayout';
+import Footer from '../components/Footer';
 
 export default function Chatbot() {
   useScrollToTop();
@@ -122,9 +124,9 @@ export default function Chatbot() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple">
-      <main className="flex-grow flex justify-center items-start px-6 py-6">
-        <section className="bg-white rounded-2xl p-6 w-full max-w-3xl shadow-soft mb-10 pt-10 flex flex-col h-[85vh]">
+    <SidebarLayout>
+      <main className="flex-grow flex justify-center items-start px-6 pt-14">
+        <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10 pt-10 flex flex-col h-[85vh]">
           <h2 className="text-3xl font-bold text-center mb-6">UVic Course Planning Assistant 💬</h2>
 
           <div className="flex-1 overflow-y-auto space-y-4 px-2">
@@ -189,22 +191,18 @@ export default function Chatbot() {
                 onClick={exportPDF}
                 className="px-4 py-2 bg-white text-purple text-sm rounded-full border border-purple hover:bg-purple/10"
               >
-                📄 Export as PDF
+                📄 Export Chat
               </button>
               <button
                 onClick={savePlan}
                 className="px-4 py-2 bg-white text-purple text-sm rounded-full border border-purple hover:bg-purple/10"
               >
-                💾 Save this Plan
+                💾 Save this Schdule
               </button>
             </div>
           </div>
         </section>
       </main>
-
-      <footer className="bg-primary text-purple/60 py-4 text-center text-sm w-full">
-        © {new Date().getFullYear()} UVic Course Planner
-      </footer>
-    </div>
+    </SidebarLayout>
   );
 }
