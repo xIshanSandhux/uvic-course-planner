@@ -14,8 +14,6 @@ from backend.db import database, courses_main,majors
 # Create router
 router = APIRouter()
 
-
-
 # Fetching all the courses form the DB
 async def db_courses():
     # await database.connect()
