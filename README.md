@@ -30,15 +30,13 @@ psql -U postgres -h localhost -p 5432
 
 ## For backend:
 
-cd backend
-python -m venv venv
 venv\Scripts\activate
-pip install -r requirements.txt
+uvicorn backend.main:app --reload
 
 ## For frontend:
 
 cd frontend
-npm install
+venv\Scripts\activate
 npm run dev
 
 # Make sure you have 2 .env files
