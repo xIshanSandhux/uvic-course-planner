@@ -101,10 +101,10 @@ export default function LandingPage() {
           </section>
         </main>
 
-        {/* Footer */}
+        {/* Footer
         <footer className="bg-primary text-purple/60 py-4 text-center text-sm">
           © {new Date().getFullYear()} UVic Course Planner
-        </footer>
+        </footer> */}
       </div>
     </div>
   );

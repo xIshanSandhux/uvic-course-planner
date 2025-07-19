@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import ProgressTracker from '../components/ProgressTracker';
 import useScrollToTop from '../hooks/useScrollToTop';
 import SidebarLayout from '../components/SidebarLayout';
-import Footer from '../components/Footer';
 
 const majors = [
   "Select a Major", "Software Engineering", "Computer Science", "Electrical Engineering",
@@ -179,7 +178,6 @@ export default function FS1PersonalInfo() {
             </div>
           </section>
         </main>
-        <Footer />
       </SidebarLayout>
     </div>
   );

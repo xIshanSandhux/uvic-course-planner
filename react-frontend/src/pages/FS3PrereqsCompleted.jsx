@@ -4,7 +4,6 @@ import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
 import useScrollToTop from '../hooks/useScrollToTop';
 import SidebarLayout from '../components/SidebarLayout';
-import Footer from '../components/Footer';
 
 export default function FS3PrereqsCompleted() {
   useScrollToTop();

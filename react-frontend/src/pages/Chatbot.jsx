@@ -4,7 +4,6 @@ import axios from 'axios';
 import jsPDF from 'jspdf';
 import useScrollToTop from '../hooks/useScrollToTop';
 import SidebarLayout from '../components/SidebarLayout';
-import Footer from '../components/Footer';
 
 export default function Chatbot() {
   useScrollToTop();
@@ -125,7 +124,7 @@ export default function Chatbot() {
 
   return (
     <SidebarLayout>
-      <main className="flex-grow flex justify-center items-start px-6 pt-14">
+      <main className="flex-grow flex justify-center items-start px-6 pt-14 pb-10">
         <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10 pt-10 flex flex-col h-[85vh]">
           <h2 className="text-3xl font-bold text-center mb-6">UVic Course Planning Assistant 💬</h2>
 
