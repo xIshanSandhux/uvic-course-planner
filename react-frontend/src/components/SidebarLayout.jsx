@@ -43,9 +43,9 @@ export default function SidebarLayout({ children }) {
           <ul className="space-y-1">
             {[ 
               { label: 'Home', path: '/' },
-              { label: '1. Profile Form', path: '/form' },
-              { label: '2. Course Plan', path: '/form/plan' },
-              { label: '3. Prereqs', path: '/courses' },
+              { label: 'Profile Form', path: '/form' },
+              { label: 'Course Plan', path: '/form/plan' },
+              { label: 'Prerequisite Courses', path: '/courses' },
               { label: 'Chatbot AI', path: '/chat' },
             ].map(({ label, path }) => (
               <li key={path}>

@@ -8,10 +8,7 @@ export default function LandingPage() {
   return (
     <SidebarLayout>
       <div className="flex-grow flex flex-col">
-        <header className="p-4 bg-transparent">
-          <button onClick={() => navigate('/form')} aria-label="Start Planning">
-            {/* Optional: keep the icon or text here if needed */}
-          </button>
+        <header className="p-16 bg-transparent">
         </header>
 
         {/* Hero Section */}
