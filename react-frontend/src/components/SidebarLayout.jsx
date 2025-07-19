@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 
 function HamburgerIcon() {
@@ -20,6 +20,12 @@ function CloseIcon() {
 
 export default function SidebarLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNavigate = (path) => {
+    setSidebarOpen(false);
+    navigate(path);
+  };
 
   return (
     <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple font-sans">
@@ -35,21 +41,20 @@ export default function SidebarLayout({ children }) {
         </div>
         <nav className="mt-6">
           <ul className="space-y-1">
-            {[
+            {[ 
               { label: 'Home', path: '/' },
-              { label: 'Profile Form', path: '/form' },
-              { label: 'Course Plan', path: '/form/plan' },
-              { label: 'Prereqs', path: '/courses' },
+              { label: '1. Profile Form', path: '/form' },
+              { label: '2. Course Plan', path: '/form/plan' },
+              { label: '3. Prereqs', path: '/courses' },
               { label: 'Chatbot AI', path: '/chat' },
             ].map(({ label, path }) => (
               <li key={path}>
-                <Link
-                  to={path}
-                  className="block px-4 py-3 text-dark hover:bg-accent hover:text-white transition rounded"
-                  onClick={() => setSidebarOpen(false)}
+                <button
+                  onClick={() => handleNavigate(path)}
+                  className="block w-full text-left px-4 py-3 bg-offwhite text-dark hover:bg-accent hover:text-white transition-colors rounded"
                 >
                   {label}
-                </Link>
+                </button>
               </li>
             ))}
           </ul>
@@ -74,7 +79,6 @@ export default function SidebarLayout({ children }) {
         </header>
 
         <main className="flex-grow">{children}</main>
-
       </div>
     </div>
   );
