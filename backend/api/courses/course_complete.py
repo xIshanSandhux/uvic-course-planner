@@ -17,6 +17,7 @@ from playwright.async_api import async_playwright
 import asyncio
 import sys
 import os
+from typing import Dict
 
 # Fix import path
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
@@ -75,7 +76,7 @@ session = SessionManager()
 
 # POST request to set the courses completed by the user
 @router.post("/courses_completed")
-def post_courses_completed(req: ExtractRequest):
+def post_courses_completed(req: ExtractRequest) -> Dict[str, str]:
     try:
         # print(f"Received request: {req}")  # Debug print
         session.set_courses_completed(req.courses)

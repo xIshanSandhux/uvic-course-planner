@@ -6,16 +6,17 @@ import json
 from sqlalchemy import select
 import requests
 from bs4 import BeautifulSoup
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, status
 from pydantic import BaseModel
 import asyncio
 from backend.db import database, majors
-
+from backend.api.apiModel import APIResponse, ErrorResponse
+from typing import List
 
 router = APIRouter()
 
 # Pydantic model for the request body
-class ExtractRequest(BaseModel):
+class MajorRequest(BaseModel):
     major: str
 
 
@@ -202,42 +203,66 @@ async def store_course_data(major: str):
 # if it is it will just return the courses stored in the DB
 # if it is not it stores the details for that major in the background and usee parse_program_requirements() function to send the course list
 @router.post("/extract_courses")
-async def extracted_courses(req: ExtractRequest, background_tasks: BackgroundTasks):
+async def extracted_courses(req: MajorRequest, background_tasks: BackgroundTasks) -> APIResponse[List[str]]:
 
-    # postgres query
-    query = select(majors).where(majors.c.major == req.major)
-    major = await database.fetch_one(query)
-
-    # courses will be stored in this list which will be sent back to the user
-    course_list =[]
-
-    # Checking if the selected major is in the DB or not
-    if major:
-
-        # postgres query to get the course list of the major
-        course_query = select(majors.c.courses).where(majors.c.major == req.major)
-        course_list_db = await database.fetch_one(course_query)
-
-        # iterating over the course list and storing them in the list
-        for course in course_list_db['courses']:
-            if course['code']:
-                course_list.append(f"{course['code']}: {course['description']}")
-            else:
-                course_list.append(course['description'])
-    else:
-
-        # Running the Db storing queries in the background
-        # so that users dont have to wait
-        background_tasks.add_task(store_major_data,req.major)
-        background_tasks.add_task(store_course_data,req.major)
-        
-        # Sending the list to the user
-        list_courses = parse_program_requirements(get_program_pid(req.major))
-        for course in list_courses:
-            if course['code']:
-                course_list.append(f"{course['code']}: {course['description']}")
-            else:
-                course_list.append(course['description'])
+    if not req.major:
+       return ErrorResponse(
+            error="Major is required",
+            code="MAJOR_REQUIRED"
+        )
     
-    # print("course_list: ",course_list)
-    return course_list
+    try:
+        # postgres query
+        query = select(majors).where(majors.c.major == req.major)
+        major = await database.fetch_one(query)
+
+        # courses will be stored in this list which will be sent back to the user
+        course_list =[]
+
+        # Checking if the selected major is in the DB or not
+        if major:
+
+            # postgres query to get the course list of the major
+            course_query = select(majors.c.courses).where(majors.c.major == req.major)
+            course_list_db = await database.fetch_one(course_query)
+
+            # iterating over the course list and storing them in the list
+            for course in course_list_db['courses']:
+                if course['code']:
+                    course_list.append(f"{course['code']}: {course['description']}")
+                else:
+                    course_list.append(course['description'])
+            
+            return APIResponse(
+                success=True,
+                data=course_list,
+                message="Course list extracted successfully"
+            )
+
+        else:
+
+            # Running the Db storing queries in the background
+            # so that users dont have to wait
+            background_tasks.add_task(store_major_data,req.major)
+            background_tasks.add_task(store_course_data,req.major)
+            
+            # Sending the list to the user
+            list_courses = parse_program_requirements(get_program_pid(req.major))
+            for course in list_courses:
+                if course['code']:
+                    course_list.append(f"{course['code']}: {course['description']}")
+                else:
+                    course_list.append(course['description'])
+            
+            return APIResponse(
+                success=True,
+                data=course_list,
+                message="Course list extracted successfully"
+            )
+        
+    except Exception as e:
+        return ErrorResponse(
+            error="Internal Server Error while extracting courses",
+            code="INTERNAL_SERVER_ERROR"
+        )
+    
