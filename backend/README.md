@@ -126,6 +126,10 @@ backend/
   ```
   **Type**: `Dict[str, str]` (Object with message field)
 - **Error Response**: `HTTPException` with status code 500 and error detail
+- **Functionality**: 
+  - Stores user's completed courses in session memory
+  - Converts course list to comma-separated string for storage
+  - Validates course data before storing
 
 #### `/courses_completed` (GET)
 - **Purpose**: Get courses completed by the user
@@ -136,6 +140,10 @@ backend/
   ```
   **Type**: `str` (Comma-separated string)
 - **Error Response**: `Dict[str, str]` with error message
+- **Functionality**: 
+  - Retrieves completed courses from session memory
+  - Returns courses as comma-separated string
+  - Handles empty course lists gracefully
 
 #### `/course_list` (POST)
 - **Purpose**: Set the course list for a major
@@ -158,6 +166,10 @@ backend/
   ```
   **Type**: `Dict[str, str]` (Object with message field)
 - **Error Response**: `HTTPException` with status code 500 and error detail
+- **Functionality**: 
+  - Stores full course list for selected major in session
+  - Converts array to comma-separated string for consistency
+  - Used as reference for filtering available courses
 
 #### `/course_list` (GET)
 - **Purpose**: Get the course list for a major
@@ -168,6 +180,10 @@ backend/
   ```
   **Type**: `str` (Comma-separated string)
 - **Error Response**: `Dict[str, str]` with error message
+- **Functionality**: 
+  - Retrieves stored course list from session memory
+  - Returns all courses for the selected major
+  - Provides reference for course selection and filtering
 
 #### `/courses_not_completed` (GET)
 - **Purpose**: Get courses not completed by the user that are offered in the current term
@@ -237,10 +253,10 @@ backend/
   }
   ```
   **Type**: `Dict[str, Union[bool, List[Dict[str, str]]]]` (Object with success flag and content array)
-- **Features**:
-  - Maintains chat history
-  - Supports system prompts
-  - Temperature set to 0.3 for consistent responses
+- **Functionality**: 
+  - Maintains chat history and conversation context
+  - Processes user queries with course planning context
+  - Returns AI-generated responses for academic guidance
 
 #### `/google/chat` (POST)
 - **Purpose**: AI chat using Google's Gemma-3-27b-it model
@@ -262,10 +278,10 @@ backend/
   }
   ```
   **Type**: `Dict[str, Union[bool, List[Dict[str, str]]]]` (Object with success flag and content array)
-- **Features**:
-  - Alternative to Cohere chat
-  - Plain text responses only
-  - Maintains conversation context
+- **Functionality**: 
+  - Provides alternative AI chat using Google's model
+  - Maintains conversation context and history
+  - Returns plain text responses for course planning assistance
 
 ## Session Management
 
@@ -289,3 +305,5 @@ GOOGLE_API_KEY=your_google_api_key
 ## CORS Configuration
 
 The API is configured with CORS middleware to allow cross-origin requests from the frontend application. Currently set to allow all origins (`"*"`) for development purposes.
+
+```
