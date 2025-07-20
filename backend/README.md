@@ -90,6 +90,7 @@ backend/
     "major": "Software Engineering"
   }
   ```
+  **Type**: `ExtractRequest` (Pydantic model with `major: str`)
 - **Response**: 
   ```json
   [
@@ -98,6 +99,7 @@ backend/
     "MATH 100: Calculus I"
   ]
   ```
+  **Type**: `List[str]` (Array of course strings)
 - **Functionality**: 
   - Checks if major exists in database
   - If exists: returns stored course list
@@ -115,12 +117,15 @@ backend/
     ]
   }
   ```
+  **Type**: `ExtractRequest` (Pydantic model with `courses: List[str]`)
 - **Response**: 
   ```json
   {
     "message": "Courses completed posted successfully"
   }
   ```
+  **Type**: `Dict[str, str]` (Object with message field)
+- **Error Response**: `HTTPException` with status code 500 and error detail
 
 #### `/courses_completed` (GET)
 - **Purpose**: Get courses completed by the user
@@ -129,7 +134,8 @@ backend/
   ```
   "CSC 110: Fundamentals of Programming I, MATH 100: Calculus I"
   ```
-  (Comma-separated string)
+  **Type**: `str` (Comma-separated string)
+- **Error Response**: `Dict[str, str]` with error message
 
 #### `/course_list` (POST)
 - **Purpose**: Set the course list for a major
@@ -143,12 +149,15 @@ backend/
     ]
   }
   ```
+  **Type**: `ExtractRequest` (Pydantic model with `courses: List[str]`)
 - **Response**: 
   ```json
   {
     "message": "Course list posted successfully"
   }
   ```
+  **Type**: `Dict[str, str]` (Object with message field)
+- **Error Response**: `HTTPException` with status code 500 and error detail
 
 #### `/course_list` (GET)
 - **Purpose**: Get the course list for a major
@@ -157,7 +166,8 @@ backend/
   ```
   "CSC 110: Fundamentals of Programming I, CSC 115: Fundamentals of Programming II, MATH 100: Calculus I"
   ```
-  (Comma-separated string)
+  **Type**: `str` (Comma-separated string)
+- **Error Response**: `Dict[str, str]` with error message
 
 #### `/courses_not_completed` (GET)
 - **Purpose**: Get courses not completed by the user that are offered in the current term
@@ -169,6 +179,7 @@ backend/
     "MATH 101: Calculus II"
   ]
   ```
+  **Type**: `List[str]` (Array of course strings)
 - **Functionality**: 
   - Returns courses from session that haven't been completed
   - Filters based on availability in current term
@@ -183,6 +194,7 @@ backend/
     "message": "Courses not completed posted successfully"
   }
   ```
+  **Type**: `Dict[str, str]` (Object with message field)
 - **Functionality**: 
   - Compares completed courses with major requirements
   - Filters courses available in current term (Summer)
@@ -197,6 +209,7 @@ backend/
     "message": "Pre-req check posted successfully"
   }
   ```
+  **Type**: `Dict[str, str]` (Object with message field)
 - **Functionality**: 
   - Analyzes prerequisites for each course not completed
   - Checks if user has completed required prerequisites
@@ -215,6 +228,7 @@ backend/
     ]
   }
   ```
+  **Type**: `ChatRequest` (Pydantic model with `messages: List[ChatMessage]`)
 - **Response**: 
   ```json
   {
@@ -222,6 +236,7 @@ backend/
     "content": [{"text": "Based on your academic progress..."}]
   }
   ```
+  **Type**: `Dict[str, Union[bool, List[Dict[str, str]]]]` (Object with success flag and content array)
 - **Features**:
   - Maintains chat history
   - Supports system prompts
@@ -238,6 +253,7 @@ backend/
     ]
   }
   ```
+  **Type**: `ChatRequest` (Pydantic model with `messages: List[ChatMessage]`)
 - **Response**: 
   ```json
   {
@@ -245,6 +261,7 @@ backend/
     "content": [{"text": "Based on your academic progress..."}]
   }
   ```
+  **Type**: `Dict[str, Union[bool, List[Dict[str, str]]]]` (Object with success flag and content array)
 - **Features**:
   - Alternative to Cohere chat
   - Plain text responses only
