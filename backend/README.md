@@ -231,6 +231,22 @@ backend/
   - Checks if user has completed required prerequisites
   - Updates session with courses user can take
 
+#### `/pre_req_check` (GET)
+- **Purpose**: Get courses that user can take based on prerequisites
+- **Request Body**: None
+- **Response**: 
+  ```json
+  [
+    "CSC 115: Fundamentals of Programming II",
+    "MATH 101: Calculus II"
+  ]
+  ```
+  **Type**: `List[str]` (Array of course strings)
+- **Functionality**: 
+  - Retrieves filtered course list from session memory
+  - Returns only courses where prerequisites are satisfied
+  - Provides final list of available courses for user
+
 ### AI Chat Endpoints
 
 #### `/cohere/chat` (POST)
@@ -305,5 +321,7 @@ GOOGLE_API_KEY=your_google_api_key
 ## CORS Configuration
 
 The API is configured with CORS middleware to allow cross-origin requests from the frontend application. Currently set to allow all origins (`"*"`) for development purposes.
+
+```
 
 ```
