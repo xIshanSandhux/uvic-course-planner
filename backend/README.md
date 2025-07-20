@@ -321,7 +321,3 @@ GOOGLE_API_KEY=your_google_api_key
 ## CORS Configuration
 
 The API is configured with CORS middleware to allow cross-origin requests from the frontend application. Currently set to allow all origins (`"*"`) for development purposes.
-
-```
-
-```
