@@ -8,7 +8,7 @@
 import json
 import re
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlalchemy import select, update
 from backend.db import database, courses_main
@@ -17,10 +17,9 @@ from playwright.async_api import async_playwright
 import asyncio
 import sys
 import os
+from typing import Dict
+from backend.api.apiModel import APIResponse, ErrorResponse, SuccessResponse
 
-# Fix import path
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-# from backend.db import database, courses_main, majors
 
 # Create router
 router = APIRouter()
@@ -57,7 +56,7 @@ class SessionManager:
         self.courses_list_str = ", ".join(courses)
     
     def get_courses_list(self):
-        return self.courses_list_str
+        return self.courses_list
 
     def set_pre_req_check(self, pre_reqs):
         self.pre_req_comp_courses = pre_reqs
@@ -68,49 +67,77 @@ class SessionManager:
 
 
 # Pydantic model for the request body
-class ExtractRequest(BaseModel):
+class CourseRequest(BaseModel):
     courses: list
 
 session = SessionManager()
 
 # POST request to set the courses completed by the user
 @router.post("/courses_completed")
-def post_courses_completed(req: ExtractRequest):
+def post_courses_completed(req: CourseRequest) -> Dict[str, str]:
     try:
-        # print(f"Received request: {req}")  # Debug print
+        if not req.courses:
+            return ErrorResponse(
+                error="Courses are required",
+                code="COURSES_REQUIRED"
+            )
         session.set_courses_completed(req.courses)
-        # print("courses completed from the frontend: ", session.get_courses_completed())
-        return {"message": "Courses completed posted successfully"}
+        
+        return SuccessResponse(
+            message="Courses completed posted successfully"
+        )
     except Exception as e:
-        # print(f"Error in post_courses_completed: {e}")  # Debug print
-        raise HTTPException(status_code=500, detail=str(e))
+        return ErrorResponse(
+            error=str(e),
+            code="INTERNAL_SERVER_ERROR"
+        )
 
 # GET request to get the courses completed by the user
 @router.get("/courses_completed")
 def get_courses_completed():
     try:
-        return session.get_courses_completed()
+        return APIResponse(
+            success=True,
+            data=session.get_courses_completed()
+        )
     except Exception as e:
-        # print(f"Error in get_courses_completed: {e}")  #
-        return {"error": str(e)}
+        return ErrorResponse(
+            error=str(e),
+            code="INTERNAL_SERVER_ERROR"
+        )
 
 # POST request to set the course list for a major
 @router.post("/course_list")
-def post_full_course_list(req: ExtractRequest):
+def post_full_course_list(req: CourseRequest):
     try:
+        if not req.courses:
+            return ErrorResponse(
+                error="Courses are required",
+                code="COURSES_REQUIRED"
+            )
         session.set_courses_list(req.courses)
-        # print("course list from the frontend: ", session.get_courses_list())
-        return {"message": "Course list posted successfully"}
+        return SuccessResponse(
+            message="Course list posted successfully"
+        )
     except Exception as e:
-       raise HTTPException(status_code=500, detail=str(e))
+        return ErrorResponse(
+            error=str(e),
+            code="INTERNAL_SERVER_ERROR"
+        )
 
 # GET request to get the course list for a major
 @router.get("/course_list")
 def get_full_course_list():
     try:
-        return session.get_courses_list()
+        return APIResponse(
+            success=True,
+            data=session.get_courses_list()
+        )
     except Exception as e:
-        return {"error": str(e)}
+        return ErrorResponse(
+            error=str(e),
+            code="INTERNAL_SERVER_ERROR"
+        )
 
 
 # Fetching all the courses form the DB
@@ -213,7 +240,10 @@ async def run(subject: str, courseNumber: str):
 # GET request to get the courses not completed by the user and are offered in the term
 @router.get("/courses_not_completed")
 async def course_not_comp_get():
-    return session.get_courses_not_completed()
+    return APIResponse(
+        success=True,
+        data=session.get_courses_not_completed()
+    )
 
 @router.post("/courses_not_completed")
 async def course_not_comp():
@@ -245,7 +275,9 @@ async def course_not_comp():
    
 
     session.set_courses_not_completed(course_avail)
-    return {"message": "Courses not completed posted successfully"}
+    return SuccessResponse(
+        message="Courses not completed posted successfully"
+    )
 
 
 async def pre_req_fetch(course: str):
@@ -265,10 +297,8 @@ async def pre_req_fetch(course: str):
 async def pre_req_check():
    
     courses_not_completed = session.get_courses_not_completed()
-    # print("courses_not_completed text pre req check: ",courses_not_completed)
 
     course_comp = session.get_courses_completed_list()
-    # print("course_comp text pre req check: ",course_comp)
 
 
     course_codes = []
@@ -276,45 +306,39 @@ async def pre_req_check():
         match = re.match(r"[A-Z]{3,4}\d{3}", c)
         if match:
             course_codes.append(match.group(0))
-    # print("course_codes: ",course_codes)
 
     avail = True
     prereq_comp = []
     prereq_not_comp = []
     for course in courses_not_completed:
 
-        # print("course: ",course)
         pre_reqs = await pre_req_fetch(course)
-        # course_c = re.match(r"[A-Z]{3,4}\d{3}", course).group(0)
 
         for pre in pre_reqs:
             if "Complete 1 of" == pre['type']:
                 if not any(c in pre['courses'] for c in course_codes):
                     avail = False
-                    # print(course" can be done by user")
-                    # print(pre)
-                    # print(" ")
                     if avail==False:
-                        # print(f"{course} cannot be dne by user")
                         prereq_not_comp.append(course)
             elif "Complete all of" == pre['type']:
                 for c in pre['courses']:
                     if c not in course_codes:
                         avail = False
                         if avail==False:
-                            # print(f"{course} cannot be dne by user")
                             prereq_not_comp.append(course)
                             break
         if avail==True:
             prereq_comp.append(course)
-            # print(f"{course} can be dne by user")
-    # print("prereq_comp: ",prereq_comp)
-    # print("prereq_not_comp: ",prereq_not_comp)
+           
     session.set_pre_req_check(prereq_comp)
-    print("prereq_comp: ",session.get_pre_req_check())
-    return {"message": "Pre-req check posted successfully"}
+    return SuccessResponse(
+        message="Pre-req check posted successfully"
+    )
 
 @router.get("/pre_req_check")
 async def pre_req_check_get():
    
-    return session.get_pre_req_check()
+    return APIResponse(
+        success=True,
+        data=session.get_pre_req_check()
+    )

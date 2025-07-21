@@ -84,59 +84,229 @@ backend/
 
 #### `/extract_courses` (POST)
 - **Purpose**: Extract and store course data for a specific major
-- **Request Body**: `{"major": "string"}`
+- **Request Body**: 
+  ```json
+  {
+    "major": "Software Engineering"
+  }
+  ```
+  **Type**: `ExtractRequest` (Pydantic model with `major: str`)
+- **Response**: 
+  ```json
+  [
+    "CSC 110: Fundamentals of Programming I",
+    "CSC 115: Fundamentals of Programming II", 
+    "MATH 100: Calculus I"
+  ]
+  ```
+  **Type**: `List[str]` (Array of course strings)
+- **Functionality**: 
+  - Checks if major exists in database
+  - If exists: returns stored course list
+  - If not: fetches from UVic API, stores in background, returns immediate list
+  - Course format: "CODE: Description"
 
 #### `/courses_completed` (POST)
 - **Purpose**: Set courses completed by the user
-- **Request Body**: `{"courses": ["string"]}`
-- **Response**: `{"message": "Courses completed posted successfully"}`
+- **Request Body**: 
+  ```json
+  {
+    "courses": [
+      "CSC 110: Fundamentals of Programming I",
+      "MATH 100: Calculus I"
+    ]
+  }
+  ```
+  **Type**: `ExtractRequest` (Pydantic model with `courses: List[str]`)
+- **Response**: 
+  ```json
+  {
+    "message": "Courses completed posted successfully"
+  }
+  ```
+  **Type**: `Dict[str, str]` (Object with message field)
+- **Error Response**: `HTTPException` with status code 500 and error detail
+- **Functionality**: 
+  - Stores user's completed courses in session memory
+  - Converts course list to comma-separated string for storage
+  - Validates course data before storing
 
 #### `/courses_completed` (GET)
 - **Purpose**: Get courses completed by the user
-- **Response**: Comma-separated string of completed courses
+- **Request Body**: None
+- **Response**: 
+  ```
+  "CSC 110: Fundamentals of Programming I, MATH 100: Calculus I"
+  ```
+  **Type**: `str` (Comma-separated string)
+- **Error Response**: `Dict[str, str]` with error message
+- **Functionality**: 
+  - Retrieves completed courses from session memory
+  - Returns courses as comma-separated string
+  - Handles empty course lists gracefully
 
 #### `/course_list` (POST)
 - **Purpose**: Set the course list for a major
-- **Request Body**: `{"courses": ["string"]}`
-- **Response**: `{"message": "Course list posted successfully"}`
+- **Request Body**: 
+  ```json
+  {
+    "courses": [
+      "CSC 110: Fundamentals of Programming I",
+      "CSC 115: Fundamentals of Programming II",
+      "MATH 100: Calculus I"
+    ]
+  }
+  ```
+  **Type**: `ExtractRequest` (Pydantic model with `courses: List[str]`)
+- **Response**: 
+  ```json
+  {
+    "message": "Course list posted successfully"
+  }
+  ```
+  **Type**: `Dict[str, str]` (Object with message field)
+- **Error Response**: `HTTPException` with status code 500 and error detail
+- **Functionality**: 
+  - Stores full course list for selected major in session
+  - Converts array to comma-separated string for consistency
+  - Used as reference for filtering available courses
 
 #### `/course_list` (GET)
 - **Purpose**: Get the course list for a major
-- **Response**: Comma-separated string of courses
+- **Request Body**: None
+- **Response**: 
+  ```
+  "CSC 110: Fundamentals of Programming I, CSC 115: Fundamentals of Programming II, MATH 100: Calculus I"
+  ```
+  **Type**: `str` (Comma-separated string)
+- **Error Response**: `Dict[str, str]` with error message
+- **Functionality**: 
+  - Retrieves stored course list from session memory
+  - Returns all courses for the selected major
+  - Provides reference for course selection and filtering
 
 #### `/courses_not_completed` (GET)
 - **Purpose**: Get courses not completed by the user that are offered in the current term
+- **Request Body**: None
+- **Response**: 
+  ```json
+  [
+    "CSC 115: Fundamentals of Programming II",
+    "MATH 101: Calculus II"
+  ]
+  ```
+  **Type**: `List[str]` (Array of course strings)
 - **Functionality**: 
-  - Compares completed courses with major requirements
-  - Checks course availability using Playwright automation
-  - Returns filtered list of available courses
+  - Returns courses from session that haven't been completed
+  - Filters based on availability in current term
+  - Checks Summer availability in database
 
 #### `/courses_not_completed` (POST)
 - **Purpose**: Process and filter courses not completed
+- **Request Body**: None (uses session data from previous endpoints)
+- **Response**: 
+  ```json
+  {
+    "message": "Courses not completed posted successfully"
+  }
+  ```
+  **Type**: `Dict[str, str]` (Object with message field)
 - **Functionality**: 
-  - Fetches all courses from database
-  - Checks availability for Summer 2025 term
-  - Updates database with availability status
+  - Compares completed courses with major requirements
+  - Filters courses available in current term (Summer)
+  - Updates session with filtered course list
+
+#### `/pre_req_check` (POST)
+- **Purpose**: Check prerequisites for courses not completed
+- **Request Body**: None (uses session data)
+- **Response**: 
+  ```json
+  {
+    "message": "Pre-req check posted successfully"
+  }
+  ```
+  **Type**: `Dict[str, str]` (Object with message field)
+- **Functionality**: 
+  - Analyzes prerequisites for each course not completed
+  - Checks if user has completed required prerequisites
+  - Updates session with courses user can take
+
+#### `/pre_req_check` (GET)
+- **Purpose**: Get courses that user can take based on prerequisites
+- **Request Body**: None
+- **Response**: 
+  ```json
+  [
+    "CSC 115: Fundamentals of Programming II",
+    "MATH 101: Calculus II"
+  ]
+  ```
+  **Type**: `List[str]` (Array of course strings)
+- **Functionality**: 
+  - Retrieves filtered course list from session memory
+  - Returns only courses where prerequisites are satisfied
+  - Provides final list of available courses for user
 
 ### AI Chat Endpoints
 
 #### `/cohere/chat` (POST)
 - **Purpose**: AI chat using Cohere's Command-R model
-- **Request Body**: `{"messages": [{"role": "user|assistant|system", "content": "string"}]}`
-- **Response**: `{"success": true, "content": [{"text": "response"}]}`
-- **Features**:
-  - Maintains chat history
-  - Supports system prompts
-  - Temperature set to 0.3 for consistent responses
+- **Request Body**: 
+  ```json
+  {
+    "messages": [
+      {"role": "user", "content": "What courses should I take next semester?"},
+      {"role": "assistant", "content": "Based on your completed courses..."}
+    ]
+  }
+  ```
+  **Type**: `ChatRequest` (Pydantic model with `messages: List[ChatMessage]`)
+- **Response**: 
+  ```json
+  {
+    "success": true, 
+    "content": [{"text": "Based on your academic progress..."}]
+  }
+  ```
+  **Type**: `Dict[str, Union[bool, List[Dict[str, str]]]]` (Object with success flag and content array)
+- **Functionality**: 
+  - Maintains chat history and conversation context
+  - Processes user queries with course planning context
+  - Returns AI-generated responses for academic guidance
 
 #### `/google/chat` (POST)
 - **Purpose**: AI chat using Google's Gemma-3-27b-it model
-- **Request Body**: `{"messages": [{"role": "user|assistant|system", "content": "string"}]}`
-- **Response**: `{"success": true, "content": [{"text": "response"}]}`
-- **Features**:
-  - Alternative to Cohere chat
-  - Plain text responses only
-  - Maintains conversation context
+- **Request Body**: 
+  ```json
+  {
+    "messages": [
+      {"role": "user", "content": "What courses should I take next semester?"},
+      {"role": "assistant", "content": "Based on your completed courses..."}
+    ]
+  }
+  ```
+  **Type**: `ChatRequest` (Pydantic model with `messages: List[ChatMessage]`)
+- **Response**: 
+  ```json
+  {
+    "success": true, 
+    "content": [{"text": "Based on your academic progress..."}]
+  }
+  ```
+  **Type**: `Dict[str, Union[bool, List[Dict[str, str]]]]` (Object with success flag and content array)
+- **Functionality**: 
+  - Provides alternative AI chat using Google's model
+  - Maintains conversation context and history
+  - Returns plain text responses for course planning assistance
+
+## Session Management
+
+The backend uses a `SessionManager` class to maintain state between requests:
+
+- **courses_completed**: List of courses user has completed
+- **courses_list**: Full course list for the selected major
+- **courses_not_completed**: Filtered list of available courses
+- **pre_req_comp_courses**: Courses user can take based on prerequisites
 
 ## Environment Variables
 
