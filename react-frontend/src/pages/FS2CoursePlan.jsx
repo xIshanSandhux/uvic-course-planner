@@ -50,7 +50,12 @@ export default function FS2CoursePlan() {
 
       const courses = res.data.data;
 
-      await axios.post("http://127.0.0.1:8000/course_list", { courses });
+      const res2 = await axios.post("http://127.0.0.1:8000/course_list", { courses });
+
+      if (!res2.data.success) {
+        return alert(res2.data.error);
+      }
+
 
       // Conditionally route based on has_credits
       if (form.has_credits === "Yes") {
