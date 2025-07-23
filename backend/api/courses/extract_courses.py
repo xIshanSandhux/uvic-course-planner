@@ -206,7 +206,8 @@ async def store_course_data(major: str):
 async def extracted_courses(req: MajorRequest, background_tasks: BackgroundTasks) -> APIResponse[List[str]]:
 
     if not req.major:
-       return ErrorResponse(
+        print("Major is required")
+        return ErrorResponse(
             error="Major is required",
             code="MAJOR_REQUIRED"
         )
@@ -232,7 +233,7 @@ async def extracted_courses(req: MajorRequest, background_tasks: BackgroundTasks
                     course_list.append(f"{course['code']}: {course['description']}")
                 else:
                     course_list.append(course['description'])
-            
+            print(course_list)
             return APIResponse(
                 success=True,
                 data=course_list,
@@ -261,6 +262,7 @@ async def extracted_courses(req: MajorRequest, background_tasks: BackgroundTasks
             )
         
     except Exception as e:
+        print(e)
         return ErrorResponse(
             error="Internal Server Error while extracting courses",
             code="INTERNAL_SERVER_ERROR"

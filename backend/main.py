@@ -17,7 +17,7 @@ load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["http://localhost:5173"] for stricter rules
+    allow_origins=["http://localhost:5173"],  # or ["http://localhost:5173"] for stricter rules
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
