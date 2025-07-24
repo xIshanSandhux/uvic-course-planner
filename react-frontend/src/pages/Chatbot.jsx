@@ -31,18 +31,7 @@ export default function Chatbot() {
     fetchCourseContext();
   }, []);
 
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          role: 'assistant',
-          content: `${intialMessage}`,
-        },
-      ]);
-    }
-  }, [intialMessage]);
-
-  useEffect(() => {
+    useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
@@ -61,16 +50,12 @@ export default function Chatbot() {
       const preReqCheck = await axios.get('http://localhost:8000/pre_req_check');
       const preReqCheckString = preReqCheck.data.data.join(', ');
 
-      const coursesNotCompleted = await axios.get('http://localhost:8000/courses_not_completed');
-      const coursesNotCompletedString = coursesNotCompleted.data.data.join(', ');
-
       const systemPrompt = `
       The user wants to do 4 courses this term, based on the course list, courses already completed,courses left to complete which are offered in the term and the courses for which the user has completed the pre-reqs for. 
       SUGGEST 4 COURSES THAT THE USER SHOULD TAKE ONLY BASED ON THE COURSES FOR WHICH THE USER HAS COMPLETED THE PREREQS FOR.
-      Course list: ${courseListString}
-      Courses already completed: ${coursesCompletedString}
-      COURSES FOR WHICH THE USER HAS COMPLETED THE PREREQS: ${preReqCheckString}
-      Courses left to complete which are offered in the term: ${coursesNotCompletedString}
+      Full Course list: ${courseListString}
+      Courses already completed by the user in the past: ${coursesCompletedString}
+      COURSES FOR WHICH THE USER HAS COMPLETED THE PREREQS AND IS ALLOWED TO TAKE: ${preReqCheckString}
       `;
       const messagesForCohere = [{ role: 'system', content: systemPrompt }];
       const res = await fetch('http://localhost:8000/cohere/chat', {
@@ -84,6 +69,17 @@ export default function Chatbot() {
     }
     fetchIntialMessage();
   }, []);
+
+  useEffect(() => {
+    if (intialMessage && messages.length === 0) {
+      setMessages([
+        {
+          role: 'assistant',
+          content: intialMessage,
+        },
+      ]);
+    }
+  }, [intialMessage]);
 
   console.log(intialMessage);
 
