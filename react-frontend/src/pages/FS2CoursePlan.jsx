@@ -39,11 +39,12 @@ export default function FS2CoursePlan() {
       return alert("Total number of courses cannot exceed 8");
 
     try {
+      console.log(form.major);
       const res = await axios.post("http://127.0.0.1:8000/extract_courses", {
         major: form.major,
       });
 
-      // console.log(res.data);
+      console.log(res.data);
       if (!res.data.success) {
         return alert(res.data.error);
       }
@@ -51,6 +52,7 @@ export default function FS2CoursePlan() {
       const courses = res.data.data;
 
       const res2 = await axios.post("http://127.0.0.1:8000/course_list", { courses });
+      console.log(res2.data);
 
       if (!res2.data.success) {
         return alert(res2.data.error);

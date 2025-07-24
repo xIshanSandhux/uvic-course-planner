@@ -17,11 +17,13 @@ load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["http://localhost:5173"] for stricter rules
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=False,
+    allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
+
+print()
 
 @app.on_event("startup")
 async def on_startup():

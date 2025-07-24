@@ -15,6 +15,7 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
   const [courseData, setCourseData] = useState({ completed: '', courseList: '' });
+  const [intialMessage, setIntialMessage] = useState('');
 
   useEffect(() => {
     const fetchCourseContext = async () => {
@@ -30,20 +31,57 @@ export default function Chatbot() {
     fetchCourseContext();
   }, []);
 
+    useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
+
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          role: 'assistant',
-          content: `Hi ${state.name}, I’ll help you with your UVic course planning. Ask me anything about course selection!`,
-        },
-      ]);
+    const fetchIntialMessage = async () => {
+      const courseList = await axios.get('http://localhost:8000/course_list');
+      console.log("courseList", courseList.data);
+      const courseListString = courseList.data.data.join(', ')
+   
+      console.log("courseListString", courseListString);
+
+      const coursesCompleted = await axios.get('http://localhost:8000/courses_completed');
+      console.log("coursesCompleted", coursesCompleted.data);
+      const coursesCompletedString = coursesCompleted.data.data;
+
+      const preReqCheck = await axios.get('http://localhost:8000/pre_req_check');
+      const preReqCheckString = preReqCheck.data.data.join(', ');
+
+      const systemPrompt = `
+      The user wants to do 4 courses this term, based on the course list, courses already completed,courses left to complete which are offered in the term and the courses for which the user has completed the pre-reqs for. 
+      SUGGEST 4 COURSES THAT THE USER SHOULD TAKE ONLY BASED ON THE COURSES FOR WHICH THE USER HAS COMPLETED THE PREREQS FOR.
+      Full Course list: ${courseListString}
+      Courses already completed by the user in the past: ${coursesCompletedString}
+      COURSES FOR WHICH THE USER HAS COMPLETED THE PREREQS AND IS ALLOWED TO TAKE: ${preReqCheckString}
+      `;
+      const messagesForCohere = [{ role: 'system', content: systemPrompt }];
+      const res = await fetch('http://localhost:8000/cohere/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: messagesForCohere }),
+      });
+
+      const data = await res.json();
+      setIntialMessage(data.content[0].text.trim());
     }
+    fetchIntialMessage();
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+    if (intialMessage && messages.length === 0) {
+      setMessages([
+        {
+          role: 'assistant',
+          content: intialMessage,
+        },
+      ]);
+    }
+  }, [intialMessage]);
+
+  console.log(intialMessage);
 
   const yearInstructions = {
     'First Year': 'Focus on suggesting introductory-level courses and electives with few prerequisites.',

@@ -27,15 +27,30 @@ export default function FS3PrereqsCompleted() {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => {  
     try {
-      await axios.post("http://127.0.0.1:8000/courses_completed", {
-        courses: selectedCourses,
+      console.log(selectedCourses);
+      const postCoursesCompleted = await axios.post("http://127.0.0.1:8000/courses_completed", {
+        courses:selectedCourses
       });
 
-      await axios.post("http://127.0.0.1:8000/course_list", {
-        courses: courses,
-      });
+      if (!postCoursesCompleted.data.success) {
+        return alert(postCoursesCompleted.data.error);
+      }
+
+
+      const postCoursesNotCompleted = await axios.post("http://127.0.0.1:8000/courses_not_completed");
+      
+      if (!postCoursesNotCompleted.data.success) {
+        return alert(postCoursesNotCompleted.data.error);
+      }
+
+      const postPreReqCheck = await axios.post("http://127.0.0.1:8000/pre_req_check");
+      
+      if (!postPreReqCheck.data.success) {
+        return alert(postPreReqCheck.data.error);
+      }
+
 
       navigate("/chat", {
         state: {
