@@ -27,39 +27,29 @@ export default function FS3PrereqsCompleted() {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => {  
     try {
-      // console.log(selectedCourses);
-      // const postCoursesCompleted = await axios.post("http://127.0.0.1:8000/courses_completed", {
-      //   courses: selectedCourses,
-      // });
+      console.log(selectedCourses);
+      const postCoursesCompleted = await axios.post("http://127.0.0.1:8000/courses_completed", {
+        courses:selectedCourses
+      });
 
-      // console.log(postCoursesCompleted.data);
+      if (!postCoursesCompleted.data.success) {
+        return alert(postCoursesCompleted.data.error);
+      }
 
-      // if (!postCoursesCompleted.data.success) {
-      //   return alert(postCoursesCompleted.data.error);
-      // }
 
-      // console.log(courses);
-      // const postCourseList = await axios.post("http://127.0.0.1:8000/course_list", {
-      //   courses: courses,
-      // });
-      // console.log(postCourseList.data);
-      // if (!postCourseList.data.success) {
-      //   return alert(res2.data.error);
-      // }
+      const postCoursesNotCompleted = await axios.post("http://127.0.0.1:8000/courses_not_completed");
+      
+      if (!postCoursesNotCompleted.data.success) {
+        return alert(postCoursesNotCompleted.data.error);
+      }
 
-      // const postCoursesNotCompleted = await axios.post("http://127.0.0.1:8000/courses_not_completed");
-      // console.log(postCoursesNotCompleted.data);
-      // if (!postCoursesNotCompleted.data.success) {
-      //   return alert(postCoursesNotCompleted.data.error);
-      // }
-
-      // const postPreReqCheck = await axios.post("http://127.0.0.1:8000/pre_req_check");
-      // console.log(postPreReqCheck.data);
-      // if (!postPreReqCheck.data.success) {
-      //   return alert(postPreReqCheck.data.error);
-      // }
+      const postPreReqCheck = await axios.post("http://127.0.0.1:8000/pre_req_check");
+      
+      if (!postPreReqCheck.data.success) {
+        return alert(postPreReqCheck.data.error);
+      }
 
 
       navigate("/chat", {

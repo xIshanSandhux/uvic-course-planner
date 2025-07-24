@@ -9,11 +9,13 @@ class APIResponse(BaseModel, Generic[T]):
     data: Optional[T] = None
     message: Optional[str] = None
     timestamp: datetime = datetime.now()
+    code: int = 200
     
 
 class SuccessResponse(BaseModel):
     success: bool = True
     message: str
+    code: int = 201
     timestamp: datetime = datetime.now()
 
 class ErrorResponse(BaseModel):

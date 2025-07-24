@@ -17,7 +17,7 @@ from playwright.async_api import async_playwright
 import asyncio
 import sys
 import os
-from typing import Dict
+from typing import Dict, List
 from backend.api.apiModel import APIResponse, ErrorResponse, SuccessResponse
 
 
@@ -74,7 +74,7 @@ session = SessionManager()
 
 # POST request to set the courses completed by the user
 @router.post("/courses_completed")
-def post_courses_completed(req: CourseRequest) -> Dict[str, str]:
+def post_courses_completed(req: CourseRequest)->SuccessResponse:
     try:
         if not req.courses:
             return ErrorResponse(
@@ -82,11 +82,12 @@ def post_courses_completed(req: CourseRequest) -> Dict[str, str]:
                 code="COURSES_REQUIRED"
             )
         session.set_courses_completed(req.courses)
-        
+        print("session.courses_completed: ", session.courses_completed)
         return SuccessResponse(
             message="Courses completed posted successfully"
         )
     except Exception as e:
+        print(e)
         return ErrorResponse(
             error=str(e),
             code="INTERNAL_SERVER_ERROR"
@@ -239,45 +240,46 @@ async def run(subject: str, courseNumber: str):
 
 # GET request to get the courses not completed by the user and are offered in the term
 @router.get("/courses_not_completed")
-async def course_not_comp_get():
+async def course_not_comp_get() -> APIResponse[List[str]]:
     return APIResponse(
         success=True,
         data=session.get_courses_not_completed()
     )
 
 @router.post("/courses_not_completed")
-async def course_not_comp():
-    # await database.connect()
-    courses_completed_final = session.get_courses_completed()
-    completed_courses_list =  [c.strip() for c in courses_completed_final.split(",")]
-    
-    course_l = session.get_courses_list()
-    course_list_l = [c.strip() for c in course_l.split(",")]
-    # print("hello course list: ", lt1)
+async def course_not_comp() -> SuccessResponse:
+    try:
+        courses_completed_final = session.get_courses_completed()
+        completed_courses_list =  [c.strip() for c in courses_completed_final.split(",")]
+        
+        course_l = session.get_courses_list()
+        course_list_l = [c.strip() for c in course_l]
 
-    course_not_comp = []
-    for course in course_list_l:
-        if course not in completed_courses_list:
-            course_not_comp.append(course)
-    # print(course_not_comp)
-    course_avail =[]
-    for course in course_not_comp:
-        match = re.search(r"\b[A-Z]{3,4}\d{3}\b", course)
-        if match:
-            query = select(courses_main).where(courses_main.c.course_code == match.group(0))
-            course_db = await database.fetch_one(query)
-            if course_db['Summer'] is True:
-                # print(course)
-                course_avail.append(course)
-        else:
-            course_avail.append(course)
-    # await database.disconnect()
-   
+        course_not_comp = []
+        for course in course_list_l:
+            if course not in completed_courses_list:
+                course_not_comp.append(course)
+        
+        course_avail =[]
+        for course in course_not_comp:
+            match = re.search(r"\b[A-Z]{3,4}\d{3}\b", course)
+            if match:
+                query = select(courses_main).where(courses_main.c.course_code == match.group(0))
+                course_db = await database.fetch_one(query)
+                if course_db['Summer'] is True:
+                    course_avail.append(course)
+            else:
+                course_avail.append(course)  
 
-    session.set_courses_not_completed(course_avail)
-    return SuccessResponse(
-        message="Courses not completed posted successfully"
-    )
+        session.set_courses_not_completed(course_avail)
+        return SuccessResponse(
+            message="Courses not completed posted successfully"
+        )
+    except Exception as e:
+        return ErrorResponse(
+            error=str(e),
+            code="500"
+        )
 
 
 async def pre_req_fetch(course: str):
@@ -294,7 +296,7 @@ async def pre_req_fetch(course: str):
 
 # GET request to get the courses not completed by the user and are offered in the term
 @router.post("/pre_req_check")
-async def pre_req_check():
+async def pre_req_check() -> SuccessResponse:
    
     courses_not_completed = session.get_courses_not_completed()
 
@@ -336,7 +338,7 @@ async def pre_req_check():
     )
 
 @router.get("/pre_req_check")
-async def pre_req_check_get():
+async def pre_req_check_get() -> APIResponse[List[str]]:
    
     return APIResponse(
         success=True,
