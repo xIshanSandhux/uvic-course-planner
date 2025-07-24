@@ -297,45 +297,51 @@ async def pre_req_fetch(course: str):
 # GET request to get the courses not completed by the user and are offered in the term
 @router.post("/pre_req_check")
 async def pre_req_check() -> SuccessResponse:
-   
-    courses_not_completed = session.get_courses_not_completed()
+    try:
 
-    course_comp = session.get_courses_completed_list()
+        courses_not_completed = session.get_courses_not_completed()
+
+        course_comp = session.get_courses_completed_list()
 
 
-    course_codes = []
-    for c in course_comp:
-        match = re.match(r"[A-Z]{3,4}\d{3}", c)
-        if match:
-            course_codes.append(match.group(0))
+        course_codes = []
+        for c in course_comp:
+            match = re.match(r"[A-Z]{3,4}\d{3}", c)
+            if match:
+                course_codes.append(match.group(0))
 
-    avail = True
-    prereq_comp = []
-    prereq_not_comp = []
-    for course in courses_not_completed:
+        avail = True
+        prereq_comp = []
+        prereq_not_comp = []
+        for course in courses_not_completed:
 
-        pre_reqs = await pre_req_fetch(course)
+            pre_reqs = await pre_req_fetch(course)
 
-        for pre in pre_reqs:
-            if "Complete 1 of" == pre['type']:
-                if not any(c in pre['courses'] for c in course_codes):
-                    avail = False
-                    if avail==False:
-                        prereq_not_comp.append(course)
-            elif "Complete all of" == pre['type']:
-                for c in pre['courses']:
-                    if c not in course_codes:
+            for pre in pre_reqs:
+                if "Complete 1 of" == pre['type']:
+                    if not any(c in pre['courses'] for c in course_codes):
                         avail = False
                         if avail==False:
                             prereq_not_comp.append(course)
-                            break
-        if avail==True:
-            prereq_comp.append(course)
-           
-    session.set_pre_req_check(prereq_comp)
-    return SuccessResponse(
-        message="Pre-req check posted successfully"
-    )
+                elif "Complete all of" == pre['type']:
+                    for c in pre['courses']:
+                        if c not in course_codes:
+                            avail = False
+                            if avail==False:
+                                prereq_not_comp.append(course)
+                                break
+            if avail==True:
+                prereq_comp.append(course)
+            
+        session.set_pre_req_check(prereq_comp)
+        return SuccessResponse(
+            message="Pre-req check posted successfully"
+        )
+    except Exception as e:
+        return ErrorResponse(
+            error=str(e),
+            code="500"
+        )
 
 @router.get("/pre_req_check")
 async def pre_req_check_get() -> APIResponse[List[str]]:
