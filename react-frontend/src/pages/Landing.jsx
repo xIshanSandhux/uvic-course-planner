@@ -7,11 +7,9 @@ export default function LandingPage() {
 
   return (
     <SidebarLayout>
-      <div className="flex-grow flex flex-col">
-        <header className="p-16 bg-transparent">
-        </header>
+      <div className="flex flex-col flex-grow">
+        <header className="p-16 bg-transparent"></header>
 
-        {/* Hero Section */}
         <main className="flex-grow flex flex-col justify-center items-center px-6 text-center">
           <section className="bg-white rounded-2xl p-10 max-w-2xl shadow-soft">
             <h1 className="text-4xl pb-4 font-extrabold mb-4 text-purple">
@@ -20,7 +18,7 @@ export default function LandingPage() {
             <p className="text-lg text-black font-medium mb-6">
               An AI-powered assistant that helps you:
             </p>
-            <ul className="grid grid-cols-1 sm:grid-cols-1 gap-4 text-center text-purple/70 font-small list-disc list-inside mb-8">
+            <ul className="grid grid-cols-1 gap-4 text-purple/70 font-small list-disc list-inside mb-8">
               <li>Enter your academic info</li>
               <li>Get tailored course suggestions</li>
               <li>Avoid scheduling conflicts</li>

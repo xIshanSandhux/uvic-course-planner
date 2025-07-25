@@ -29,6 +29,7 @@ export default function SidebarLayout({ children }) {
 
   return (
     <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple font-sans">
+
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 w-64 bg-offwhite text-dark transform ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -43,6 +44,7 @@ export default function SidebarLayout({ children }) {
           <ul className="space-y-1">
             {[ 
               { label: 'Home', path: '/' },
+              { label: 'Dashboard', path: '/dashboard' },
               { label: 'Profile Form', path: '/form' },
               { label: 'Course Plan', path: '/form/plan' },
               { label: 'Prerequisite Courses', path: '/courses' },
@@ -70,15 +72,17 @@ export default function SidebarLayout({ children }) {
         />
       )}
 
-      {/* Main content */}
+      {/* Page content */}
       <div className="flex-grow flex flex-col">
-        <header className="p-4 bg-transparent z-10">
+        <header className="p-4 z-10 bg-transparent">
           <button onClick={() => setSidebarOpen(true)} aria-label="Open Menu">
             <HamburgerIcon />
           </button>
         </header>
 
         <main className="flex-grow">{children}</main>
+
+        <Footer />
       </div>
     </div>
   );
