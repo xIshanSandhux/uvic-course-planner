@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from './Footer';
+import logo from '../assets/logo.png';
 
+/* Reusable Icon Wrapper */
+function IconWrapper({ children }) {
+  return (
+    <div className="p-1.5 bg-black rounded-md flex items-center justify-center">
+      {children}
+    </div>
+  );
+}
+
+/* Hamburger Icon */
 function HamburgerIcon() {
   return (
-    <svg className="h-8 w-8 text-accent hover:text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg
+      className="h-6 w-6 text-accent hover:text-cyan"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
     </svg>
   );
 }
 
+/* Close Icon */
 function CloseIcon() {
   return (
-    <svg className="h-6 w-6 text-accent hover:text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg
+      className="h-6 w-6 text-accent hover:text-cyan"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
@@ -29,20 +53,26 @@ export default function SidebarLayout({ children }) {
 
   return (
     <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple font-sans">
-
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-offwhite text-dark transform ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-300 ease-in-out shadow-soft z-30`}>
+      <aside
+        className={`fixed inset-y-0 right-0 w-64 bg-offwhite text-dark transform ${
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        } transition-transform duration-300 ease-in-out shadow-soft z-30`}
+      >
+        {/* Sidebar Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-yellow-300">
           <h2 className="text-xl font-bold text-dark">Menu</h2>
           <button onClick={() => setSidebarOpen(false)} aria-label="Close Menu">
-            <CloseIcon />
+            <IconWrapper>
+              <CloseIcon />
+            </IconWrapper>
           </button>
         </div>
-        <nav className="mt-6">
-          <ul className="space-y-1">
-            {[ 
+
+        {/* Navigation */}
+        <nav className="mt-2">
+          <ul className="divide-y divide-gray-200">
+            {[
               { label: 'Home', path: '/' },
               { label: 'Dashboard', path: '/dashboard' },
               { label: 'Profile Form', path: '/form' },
@@ -53,7 +83,7 @@ export default function SidebarLayout({ children }) {
               <li key={path}>
                 <button
                   onClick={() => handleNavigate(path)}
-                  className="block w-full text-left px-4 py-3 bg-offwhite text-dark hover:bg-accent hover:text-white transition-colors rounded"
+                  className="w-full text-left px-4 py-3 text-base font-medium bg-offwhite text-dark hover:bg-accent hover:text-white transition-colors"
                 >
                   {label}
                 </button>
@@ -72,16 +102,25 @@ export default function SidebarLayout({ children }) {
         />
       )}
 
-      {/* Page content */}
+      {/* Main Content Area */}
       <div className="flex-grow flex flex-col">
-        <header className="p-4 z-10 bg-transparent">
+        {/* Header */}
+        <header className="flex justify-between items-center px-4 py-4 sm:px-6 bg-transparent border-b border-yellow-300 z-10">
+          <div
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <img src={logo} alt="CourseCraft Logo" className="h-8 w-8 object-contain" />
+            <span className="text-xl sm:text-2xl font-extrabold text-purple">CourseCraft</span>
+          </div>
           <button onClick={() => setSidebarOpen(true)} aria-label="Open Menu">
-            <HamburgerIcon />
+            <IconWrapper>
+              <HamburgerIcon />
+            </IconWrapper>
           </button>
         </header>
 
         <main className="flex-grow">{children}</main>
-
         <Footer />
       </div>
     </div>
