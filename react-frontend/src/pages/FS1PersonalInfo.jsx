@@ -24,8 +24,8 @@ const renderOption = (value) => (
 
 export default function FS1PersonalInfo() {
   useScrollToTop();
-
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     student_id: "",
@@ -37,14 +37,12 @@ export default function FS1PersonalInfo() {
     minor: "",
     specialization: "",
     has_credits: "Please Select an Option",
-
     core_courses: 0,
     elective_courses: 0,
     class_times: "Please Select an Option",
     max_credits: "Please Select an Option",
     learning_style: "Please Select an Option",
     delivery_mode: "Please Select an Option",
-
     supports_coop: "Please Select an Option",
     coop_completed: 0,
     coop_planned: 0,
@@ -56,110 +54,90 @@ export default function FS1PersonalInfo() {
 
   return (
     <SidebarLayout>
-      <main className="flex-grow flex justify-center items-start px-6 py-6 pt-14">
-        
-        <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10">
-          
+      <div className="w-full max-w-2xl mx-auto px-6 py-10 overflow-x-hidden">
+        <section className="bg-white rounded-2xl p-8 shadow-soft mb-10">
           <ProgressTracker currentStep={1} />
 
-
-          <div className="space-y-4 text-sm">
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Full Name</label>
-              <input
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.name}
-                onChange={e => handleChange('name', e.target.value)}
-              />
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Student ID</label>
-              <input
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.student_id}
-                onChange={e => handleChange('student_id', e.target.value)}
-              />
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Program Level</label>
-              <select
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.degree_type}
-                onChange={e => handleChange('degree_type', e.target.value)}
-              >
-                {["Please Select an Option", "Undergraduate", "Master", "PhD"].map(renderOption)}
-              </select>
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Year of Study</label>
-              <select
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.year}
-                onChange={e => handleChange('year', e.target.value)}
-              >
-                {years.map(renderOption)}
-              </select>
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Faculty</label>
-              <select
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.faculty}
-                onChange={e => handleChange('faculty', e.target.value)}
-              >
-                {[
+          <div className="space-y-4 text-sm mt-6">
+            {/* Input Fields */}
+            {[
+              {
+                label: "Full Name",
+                type: "input",
+                field: "name"
+              },
+              {
+                label: "Student ID",
+                type: "input",
+                field: "student_id"
+              },
+              {
+                label: "Program Level",
+                type: "select",
+                field: "degree_type",
+                options: ["Please Select an Option", "Undergraduate", "Master", "PhD"]
+              },
+              {
+                label: "Year of Study",
+                type: "select",
+                field: "year",
+                options: years
+              },
+              {
+                label: "Faculty",
+                type: "select",
+                field: "faculty",
+                options: [
                   "Please Select an Option",
                   "Engineering", "Science", "Social Sciences",
                   "Humanities", "Business", "Education", "Fine Arts"
-                ].map(renderOption)}
-              </select>
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Major</label>
-              <select
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.major}
-                onChange={e => handleChange('major', e.target.value)}
-              >
-                {majors.map(renderOption)}
-              </select>
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Minor (optional)</label>
-              <input
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.minor}
-                onChange={e => handleChange('minor', e.target.value)}
-              />
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Specialization (optional)</label>
-              <input
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.specialization}
-                onChange={e => handleChange('specialization', e.target.value)}
-              />
-            </div>
-
-            <div className="rounded-lg border border-dark bg-white p-3">
-              <label className="block mb-1">Completed UVic courses or have transfer credits?</label>
-              <select
-                className="w-full rounded p-2 bg-white text-black"
-                value={form.has_credits}
-                onChange={e => handleChange('has_credits', e.target.value)}
-              >
-                {["Please Select an Option", "Yes", "No"].map(renderOption)}
-              </select>
-            </div>
+                ]
+              },
+              {
+                label: "Major",
+                type: "select",
+                field: "major",
+                options: majors
+              },
+              {
+                label: "Minor (optional)",
+                type: "input",
+                field: "minor"
+              },
+              {
+                label: "Specialization (optional)",
+                type: "input",
+                field: "specialization"
+              },
+              {
+                label: "Completed UVic courses or have transfer credits?",
+                type: "select",
+                field: "has_credits",
+                options: ["Please Select an Option", "Yes", "No"]
+              }
+            ].map(({ label, type, field, options }) => (
+              <div key={field} className="rounded-lg border border-dark bg-white p-3">
+                <label className="block mb-1">{label}</label>
+                {type === "input" ? (
+                  <input
+                    className="w-full rounded p-2 bg-white text-black"
+                    value={form[field]}
+                    onChange={e => handleChange(field, e.target.value)}
+                  />
+                ) : (
+                  <select
+                    className="w-full rounded p-2 bg-white text-black"
+                    value={form[field]}
+                    onChange={e => handleChange(field, e.target.value)}
+                  >
+                    {options.map(renderOption)}
+                  </select>
+                )}
+              </div>
+            ))}
           </div>
 
+          {/* Navigation Buttons */}
           <div className="mt-6 flex justify-between">
             <button
               className="px-6 py-3 bg-gray-200 text-black font-semibold rounded-full hover:bg-gray-300 transition"
@@ -176,7 +154,7 @@ export default function FS1PersonalInfo() {
             </button>
           </div>
         </section>
-      </main>
+      </div>
     </SidebarLayout>
   );
 }

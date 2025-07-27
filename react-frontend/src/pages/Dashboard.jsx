@@ -1,16 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import SidebarLayout from '../components/SidebarLayout';
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
   return (
-    <main className="w-full min-h-screen bg-offwhite px-4 py-8 flex flex-col items-center text-purple">
-      <div className="w-full max-w-5xl">
+    <SidebarLayout>
+      <main className="w-full max-w-5xl mx-auto px-4 py-8 overflow-x-hidden text-purple">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Welcome back, Shaafi 👋</h1>
-          <p className="text-sm text-gray-600">BSc in Computer Science | 28/120 Credits | Est. Grad: Apr 2028</p>
+          <p className="text-sm text-gray-600">
+            BSc in Computer Science | 28/120 Credits | Est. Grad: Apr 2028
+          </p>
         </div>
 
         {/* 1. Term Timeline */}
@@ -37,7 +40,7 @@ export default function Dashboard() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-2">🎓 Progress Tracker</h2>
           <div className="grid grid-cols-2 gap-4">
-            {[ 
+            {[
               ['Total Credits', '28 / 120'],
               ['Core Courses', '8 / 24'],
               ['Electives', '2 / 12'],
@@ -73,7 +76,7 @@ export default function Dashboard() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-2">💬 Chat History</h2>
           <div className="bg-white rounded shadow divide-y">
-            {[ 
+            {[
               ['Fall 2025', 'Focused on prereqs + intro CS'],
               ['Spring 2026', 'Elective planning + AI track'],
               ['Summer 2026', 'Co-op application discussion'],
@@ -99,7 +102,7 @@ export default function Dashboard() {
             <li>💡 You are eligible for CSC 226 — want to add it?</li>
           </ul>
         </section>
-      </div>
-    </main>
+      </main>
+    </SidebarLayout>
   );
 }

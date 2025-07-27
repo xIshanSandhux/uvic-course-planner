@@ -52,7 +52,7 @@ export default function SidebarLayout({ children }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple font-sans">
+    <div className="flex flex-col min-h-screen w-screen bg-offwhite text-purple font-sans overflow-x-hidden">
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 right-0 w-64 bg-offwhite text-dark transform ${

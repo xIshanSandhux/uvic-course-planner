@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
 import CoursePlan from '../components/FS2-Course-Plan';
@@ -39,12 +39,10 @@ export default function FS2CoursePlan() {
       return alert("Total number of courses cannot exceed 8");
 
     try {
-      console.log(form.major);
       const res = await axios.post("http://127.0.0.1:8000/extract_courses", {
         major: form.major,
       });
 
-      console.log(res.data);
       if (!res.data.success) {
         return alert(res.data.error);
       }
@@ -52,14 +50,11 @@ export default function FS2CoursePlan() {
       const courses = res.data.data;
 
       const res2 = await axios.post("http://127.0.0.1:8000/course_list", { courses });
-      console.log(res2.data);
 
       if (!res2.data.success) {
         return alert(res2.data.error);
       }
 
-
-      // Conditionally route based on has_credits
       if (form.has_credits === "Yes") {
         navigate("/courses", {
           state: {
@@ -84,11 +79,11 @@ export default function FS2CoursePlan() {
 
   return (
     <SidebarLayout>
-      <main className="flex-grow flex justify-center items-start px-6 py-6 pt-14">
-        <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10">
+      <div className="w-full max-w-2xl mx-auto px-6 py-10 overflow-x-hidden">
+        <section className="bg-white rounded-2xl p-8 shadow-soft mb-10">
           <ProgressTracker currentStep={2} />
 
-          <div className="space-y-4 text-sm">
+          <div className="space-y-4 text-sm mt-6">
             <CoursePlan
               form={form}
               handleChange={handleChange}
@@ -112,7 +107,7 @@ export default function FS2CoursePlan() {
             </button>
           </div>
         </section>
-      </main>
+      </div>
     </SidebarLayout>
   );
 }
