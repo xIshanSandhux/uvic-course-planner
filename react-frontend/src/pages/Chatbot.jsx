@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
@@ -11,7 +11,16 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [intialMessage, setIntialMessage] = useState('');
+  const bottomRef = useRef(null); // 👈 added scroll ref
 
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+  
   useEffect(() => {
     const fetchIntialMessage = async () => {
       const courseList = await axios.get('http://localhost:8000/course_list');
@@ -47,6 +56,10 @@ export default function Chatbot() {
       setMessages([{ role: 'assistant', content: intialMessage }]);
     }
   }, [intialMessage]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); // 👈 scroll on message update
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -114,7 +127,11 @@ export default function Chatbot() {
     <SidebarLayout>
       <main className="relative w-full flex flex-col items-center bg-offwhite">
         {/* Chat messages container */}
-        <div className="w-full max-w-2xl flex-1 overflow-y-auto px-4 pt-6 pb-40">
+        <div
+          ref={scrollContainerRef}
+          className="w-full max-w-2xl flex-grow overflow-y-auto px-4 pt-6 pb-40"
+          style={{ maxHeight: 'calc(100vh - 180px)' }} // adjust for input/footer height
+        >
           <h2 className="text-xl font-semibold text-center mb-4">
             UVic Course Planning Assistant 💬
           </h2>
@@ -139,6 +156,7 @@ export default function Chatbot() {
             {loading && (
               <div className="text-sm italic text-gray-400">Assistant is typing…</div>
             )}
+            <div ref={bottomRef} /> {/* 👈 scroll target */}
           </div>
         </div>
 

@@ -60,12 +60,10 @@ export default function SidebarLayout({ children }) {
         } transition-transform duration-300 ease-in-out shadow-soft z-30`}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-yellow-300">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-yellow-900">
           <h2 className="text-xl font-bold text-dark">Menu</h2>
           <button onClick={() => setSidebarOpen(false)} aria-label="Close Menu">
-            <IconWrapper>
               <CloseIcon />
-            </IconWrapper>
           </button>
         </div>
 
@@ -105,7 +103,7 @@ export default function SidebarLayout({ children }) {
       {/* Main Content Area */}
       <div className="flex-grow flex flex-col">
         {/* Header */}
-        <header className="flex justify-between items-center px-4 py-4 sm:px-6 bg-transparent border-b border-yellow-300 z-10">
+        <header className="flex justify-between items-center px-8 py-4 sm:px-6 bg-primary border-b border-yellow-900 z-10">
           <div
             onClick={() => navigate('/')}
             className="flex items-center gap-2 cursor-pointer"
@@ -114,13 +112,11 @@ export default function SidebarLayout({ children }) {
             <span className="text-xl sm:text-2xl font-extrabold text-purple">CourseCraft</span>
           </div>
           <button onClick={() => setSidebarOpen(true)} aria-label="Open Menu">
-            <IconWrapper>
               <HamburgerIcon />
-            </IconWrapper>
           </button>
         </header>
 
-        <main className="flex-grow">{children}</main>
+        <main className="flex-grow pb-8">{children}</main>
         <Footer />
       </div>
     </div>

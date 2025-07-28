@@ -1,4 +1,22 @@
+import { useState } from 'react';
+
 export default function PersonalInfo({ form, handleChange, renderOption, majors, years }) {
+  const [majorQuery, setMajorQuery] = useState('');
+  const [showMajorSuggestions, setShowMajorSuggestions] = useState(false);
+
+  const filteredMajors =
+    majorQuery.trim() === ''
+      ? majors
+      : majors.filter((major) =>
+          major.toLowerCase().includes(majorQuery.toLowerCase())
+        );
+
+  const handleMajorSelect = (value) => {
+    handleChange('major', value);
+    setMajorQuery(value);
+    setShowMajorSuggestions(false);
+  };
+  
   return (
     <div className="w-full overflow-x-hidden">
       <div className="rounded-lg border border-dark bg-white p-3">
@@ -56,15 +74,33 @@ export default function PersonalInfo({ form, handleChange, renderOption, majors,
         </select>
       </div>
 
-      <div className="rounded-lg border border-dark bg-white p-3">
+      <div className="rounded-lg border border-dark bg-white p-3 relative">
         <label className="block mb-1">Major</label>
-        <select
+        <input
           className="w-full rounded p-2 bg-white text-black"
-          value={form.major}
-          onChange={e => handleChange('major', e.target.value)}
-        >
-          {majors.map(renderOption)}
-        </select>
+          placeholder="Start typing your major..."
+          value={majorQuery}
+          onChange={(e) => {
+            setMajorQuery(e.target.value);
+            setShowMajorSuggestions(true);
+            handleChange('major', e.target.value); // optional sync
+          }}
+          onFocus={() => setShowMajorSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowMajorSuggestions(false), 100)} // allow click
+        />
+        {showMajorSuggestions && filteredMajors.length > 0 && (
+          <ul className="absolute z-10 bg-white border border-gray-300 rounded w-full max-h-48 overflow-auto mt-1 shadow-lg">
+            {filteredMajors.map((major) => (
+              <li
+                key={major}
+                onClick={() => handleMajorSelect(major)}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {major}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="rounded-lg border border-dark bg-white p-3">
