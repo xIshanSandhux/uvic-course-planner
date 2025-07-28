@@ -11,16 +11,8 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [intialMessage, setIntialMessage] = useState('');
-  const bottomRef = useRef(null); // 👈 added scroll ref
-
   const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-  
   useEffect(() => {
     const fetchIntialMessage = async () => {
       const courseList = await axios.get('http://localhost:8000/course_list');
@@ -58,7 +50,9 @@ export default function Chatbot() {
   }, [intialMessage]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); // 👈 scroll on message update
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const sendMessage = async () => {
@@ -125,18 +119,18 @@ export default function Chatbot() {
 
   return (
     <SidebarLayout>
-      <main className="relative w-full flex flex-col items-center bg-offwhite">
-        {/* Chat messages container */}
-        <div
-          ref={scrollContainerRef}
-          className="w-full max-w-2xl flex-grow overflow-y-auto px-4 pt-6 pb-40"
-          style={{ maxHeight: 'calc(100vh - 180px)' }} // adjust for input/footer height
-        >
-          <h2 className="text-xl font-semibold text-center mb-4">
+      <main className="h-screen w-full flex justify-center items-center bg-offwhite">
+        <div className="w-full max-w-2xl h-[90vh] bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
+          {/* Header */}
+          <div className="py-4 border-b text-center text-lg font-semibold text-purple">
             UVic Course Planning Assistant 💬
-          </h2>
+          </div>
 
-          <div className="space-y-4">
+          {/* Chat Scroll Container */}
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto px-4 pt-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+          >
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -146,7 +140,7 @@ export default function Chatbot() {
                   className={`px-4 py-2 rounded-lg max-w-[80%] text-sm whitespace-pre-wrap ${
                     msg.role === 'user'
                       ? 'bg-accent text-white rounded-br-none'
-                      : 'bg-white text-black shadow-md rounded-bl-none'
+                      : 'bg-gray-100 text-black shadow-sm rounded-bl-none'
                   }`}
                 >
                   {msg.content}
@@ -156,13 +150,10 @@ export default function Chatbot() {
             {loading && (
               <div className="text-sm italic text-gray-400">Assistant is typing…</div>
             )}
-            <div ref={bottomRef} /> {/* 👈 scroll target */}
           </div>
-        </div>
 
-        {/* Sticky Chat Input */}
-        <div className="sticky bottom-0 bg-offwhite w-full max-w-2xl mx-auto px-4 pt-2 pb-6 z-10">
-          <div className="rounded-xl bg-white shadow-md p-3 flex flex-col gap-2">
+          {/* Chat Input */}
+          <div className="border-t p-4 bg-white">
             <div className="flex items-center gap-2">
               <input
                 className="flex-1 px-3 py-2 rounded-md border border-gray-300 bg-gray-50 text-black focus:outline-none"
@@ -179,23 +170,23 @@ export default function Chatbot() {
               </button>
             </div>
 
-            <div className="flex justify-between items-center pt-1 px-1">
+            <div className="flex justify-between items-center pt-2 text-sm">
               <button
                 onClick={() => navigate(-1)}
-                className="text-sm px-4 py-1 bg-black text-white rounded-md hover:opacity-80"
+                className="bg-black text-white px-4 py-1 rounded-md hover:opacity-80"
               >
                 ← Back
               </button>
               <div className="flex gap-2">
                 <button
                   onClick={exportPDF}
-                  className="text-sm px-4 py-1 bg-black text-white rounded-md hover:opacity-80"
+                  className="bg-black text-white px-4 py-1 rounded-md hover:opacity-80"
                 >
                   📄 Export
                 </button>
                 <button
                   onClick={savePlan}
-                  className="text-sm px-4 py-1 bg-black text-white rounded-md hover:opacity-80"
+                  className="bg-black text-white px-4 py-1 rounded-md hover:opacity-80"
                 >
                   💾 Save
                 </button>
