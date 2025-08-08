@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ProgressTracker from '../components/ProgressTracker';
 import useScrollToTop from '../hooks/useScrollToTop';
-import SidebarLayout from '../components/SidebarLayout';
 
 const majors = [
   "Software Engineering", "Computer Science", "Electrical Engineering",
@@ -77,8 +76,8 @@ export default function FS1PersonalInfo() {
   );
 
   return (
-    <SidebarLayout>
-      <div className="w-full max-w-2xl mx-auto px-6 py-10 overflow-x-hidden">
+    <>
+      <div className="w-full max-w-2xl mx-auto px-6 pt-10 overflow-x-hidden">
         <section className="bg-white rounded-2xl p-8 shadow-soft mb-10">
           <ProgressTracker currentStep={1} />
 
@@ -231,6 +230,6 @@ export default function FS1PersonalInfo() {
           </div>
         </section>
       </div>
-    </SidebarLayout>
+    </>
   );
 }

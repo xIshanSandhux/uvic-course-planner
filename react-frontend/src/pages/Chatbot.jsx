@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
-import SidebarLayout from '../components/SidebarLayout';
 
 export default function Chatbot() {
   const { state } = useLocation();
@@ -107,7 +106,7 @@ export default function Chatbot() {
   const savePlan = async () => {
     try {
       await axios.post('http://localhost:8000/save_plan', {
-        user: state.name,
+        user: state?.name,
         messages,
       });
       alert('✅ Plan saved successfully!');
@@ -118,9 +117,11 @@ export default function Chatbot() {
   };
 
   return (
-    <SidebarLayout>
-      <main className="h-screen w-full flex justify-center items-center bg-offwhite">
-        <div className="w-full max-w-2xl h-[90vh] bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
+    <>
+      {/* add breathing room above/below so it doesn’t touch header/footer */}
+      <div className="w-full flex justify-center px-4 mt-6 mb-8">
+        {/* height accounts for header+footer; still responsive on mobile */}
+        <div className="w-full max-w-2xl h-[calc(100dvh-200px)] min-h-[520px] bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
           {/* Header */}
           <div className="py-4 border-b text-center text-lg font-semibold text-purple">
             UVic Course Planning Assistant 💬
@@ -194,7 +195,7 @@ export default function Chatbot() {
             </div>
           </div>
         </div>
-      </main>
-    </SidebarLayout>
+      </div>
+    </>
   );
 }

@@ -3,7 +3,6 @@ import { useState } from 'react';
 import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
 import useScrollToTop from '../hooks/useScrollToTop';
-import SidebarLayout from '../components/SidebarLayout';
 
 export default function FS3PrereqsCompleted() {
   useScrollToTop();
@@ -29,28 +28,22 @@ export default function FS3PrereqsCompleted() {
 
   const handleSubmit = async () => {  
     try {
-      console.log(selectedCourses);
       const postCoursesCompleted = await axios.post("http://127.0.0.1:8000/courses_completed", {
-        courses:selectedCourses
+        courses: selectedCourses
       });
-
       if (!postCoursesCompleted.data.success) {
         return alert(postCoursesCompleted.data.error);
       }
 
-
       const postCoursesNotCompleted = await axios.post("http://127.0.0.1:8000/courses_not_completed");
-      
       if (!postCoursesNotCompleted.data.success) {
         return alert(postCoursesNotCompleted.data.error);
       }
 
       const postPreReqCheck = await axios.post("http://127.0.0.1:8000/pre_req_check");
-      
       if (!postPreReqCheck.data.success) {
         return alert(postPreReqCheck.data.error);
       }
-
 
       navigate("/chat", {
         state: {
@@ -66,9 +59,9 @@ export default function FS3PrereqsCompleted() {
   };
 
   return (
-    <SidebarLayout>
-      <main className="flex-grow flex justify-center items-start px-6 pt-14 overflow-y-auto">
-        <section className="bg-white rounded-2xl p-10 w-full max-w-2xl shadow-soft mb-10">
+    <>
+      <div className="w-full max-w-2xl mx-auto px-6 pt-10">
+        <section className="bg-white rounded-2xl p-10 w-full shadow-soft mb-10">
           <ProgressTracker currentStep={3} />
 
           {/* Search Field */}
@@ -131,7 +124,7 @@ export default function FS3PrereqsCompleted() {
             </button>
           </div>
         </section>
-      </main>
-    </SidebarLayout>
+      </div>
+    </>
   );
 }

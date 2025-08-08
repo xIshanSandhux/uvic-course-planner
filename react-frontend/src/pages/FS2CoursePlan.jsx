@@ -4,7 +4,6 @@ import axios from 'axios';
 import ProgressTracker from '../components/ProgressTracker';
 import CoursePlan from '../components/FS2-Course-Plan';
 import useScrollToTop from '../hooks/useScrollToTop';
-import SidebarLayout from '../components/SidebarLayout';
 
 const renderOption = (value) => (
   <option
@@ -78,8 +77,8 @@ export default function FS2CoursePlan() {
   };
 
   return (
-    <SidebarLayout>
-      <div className="w-full max-w-2xl mx-auto px-6 py-10 overflow-x-hidden">
+    <>
+      <div className="w-full max-w-2xl mx-auto px-6 pt-10 overflow-x-hidden">
         <section className="bg-white rounded-2xl p-8 shadow-soft mb-10">
           <ProgressTracker currentStep={2} />
 
@@ -108,6 +107,6 @@ export default function FS2CoursePlan() {
           </div>
         </section>
       </div>
-    </SidebarLayout>
+    </>
   );
 }
