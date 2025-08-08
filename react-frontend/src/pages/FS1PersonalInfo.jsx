@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ProgressTracker from '../components/ProgressTracker';
 import useScrollToTop from '../hooks/useScrollToTop';
 
@@ -31,7 +31,7 @@ const renderOption = (value) => (
     key={value}
     value={value}
     disabled={value.includes("Please") || value.includes("Select")}
-    className={value.includes("Please") || value.includes("Select") ? "italic text-gray-500" : ""}
+    className={(value.includes("Please") || value.includes("Select")) ? "italic text-gray-500" : ""}
   >
     {value}
   </option>
@@ -78,7 +78,7 @@ export default function FS1PersonalInfo() {
   return (
     <>
       <div className="w-full max-w-2xl mx-auto px-6 pt-10 overflow-x-hidden">
-        <section className="bg-white rounded-2xl p-8 shadow-soft mb-10">
+        <section className="bg-white rounded-2xl p-8 shadow-soft mb-10 text-black">
           <ProgressTracker currentStep={1} />
 
           <div className="space-y-4 text-sm mt-6">
@@ -86,7 +86,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Full Name</label>
               <input
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black placeholder-gray-500"
                 value={form.name}
                 onChange={(e) => handleChange("name", e.target.value)}
               />
@@ -96,7 +96,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Student ID (optional)</label>
               <input
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black placeholder-gray-500"
                 value={form.student_id}
                 onChange={(e) => handleChange("student_id", e.target.value)}
               />
@@ -106,7 +106,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Program Level</label>
               <select
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#1a237e]"
                 value={form.degree_type}
                 onChange={(e) => handleChange("degree_type", e.target.value)}
               >
@@ -118,7 +118,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Year of Study</label>
               <select
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#1a237e]"
                 value={form.year}
                 onChange={(e) => handleChange("year", e.target.value)}
               >
@@ -130,7 +130,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Faculty</label>
               <select
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#1a237e]"
                 value={form.faculty}
                 onChange={(e) => handleChange("faculty", e.target.value)}
               >
@@ -148,7 +148,7 @@ export default function FS1PersonalInfo() {
               <input
                 type="text"
                 placeholder="Start typing your major..."
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black placeholder-gray-500"
                 value={form.major}
                 onChange={(e) => {
                   handleChange("major", e.target.value);
@@ -179,7 +179,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Minor (optional)</label>
               <input
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black placeholder-gray-500"
                 value={form.minor}
                 onChange={(e) => handleChange("minor", e.target.value)}
               />
@@ -190,7 +190,7 @@ export default function FS1PersonalInfo() {
               <div className="rounded-lg border border-dark bg-white p-3">
                 <label className="block mb-1">Specialization (optional)</label>
                 <select
-                  className="w-full rounded p-2 bg-white text-black"
+                  className="w-full rounded p-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#1a237e]"
                   value={form.specialization}
                   onChange={(e) => handleChange("specialization", e.target.value)}
                 >
@@ -203,7 +203,7 @@ export default function FS1PersonalInfo() {
             <div className="rounded-lg border border-dark bg-white p-3">
               <label className="block mb-1">Completed UVic courses or have transfer credits?</label>
               <select
-                className="w-full rounded p-2 bg-white text-black"
+                className="w-full rounded p-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#1a237e]"
                 value={form.has_credits}
                 onChange={(e) => handleChange("has_credits", e.target.value)}
               >

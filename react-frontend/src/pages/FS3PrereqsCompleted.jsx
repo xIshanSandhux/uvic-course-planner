@@ -61,7 +61,7 @@ export default function FS3PrereqsCompleted() {
   return (
     <>
       <div className="w-full max-w-2xl mx-auto px-6 pt-10">
-        <section className="bg-white rounded-2xl p-10 w-full shadow-soft mb-10">
+        <section className="bg-white rounded-2xl p-10 w-full shadow-soft mb-10 text-black">
           <ProgressTracker currentStep={3} />
 
           {/* Search Field */}
@@ -81,7 +81,7 @@ export default function FS3PrereqsCompleted() {
             {filteredCourses.map(course => (
               <label
                 key={course}
-                className="flex items-center text-sm bg-gray-100 p-2 rounded hover:bg-gray-200 transition"
+                className="flex items-center text-sm bg-white border border-dark p-3 rounded hover:bg-gray-50 transition"
               >
                 <input
                   type="checkbox"
