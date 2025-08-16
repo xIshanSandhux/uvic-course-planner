@@ -27,7 +27,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto mt-10 px-6 text-center">
+      <div className="w-full max-w-2xl mx-auto mt-10 px-6 text-center items-center justify-center flex flex-col">
         {/* Hero Card */}
         <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 mb-10">
           <h2 className="text-3xl font-extrabold text-[#1a237e] mb-4">
